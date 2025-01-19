@@ -24,6 +24,7 @@ struct LoginView: View {
     @State private var password: String = ""
     @FocusState private var isEmailFocused: Bool
     @FocusState private var isPasswordFocused: Bool
+    @State private var shouldShowHome = false
     
     var body: some View {
         NavigationView{
@@ -95,7 +96,9 @@ struct LoginView: View {
                             .focused($isPasswordFocused)
                     }
                     
-                    NavigationLink(destination: HomeView()){
+                    Button(action: {
+                        shouldShowHome = true
+                    }) {
                         Text("Login")
                             .font(.custom("Kiwi Maru Regular", size: 18))
                             .frame(width: 233, height: 43)
@@ -149,6 +152,9 @@ struct LoginView: View {
             }
             .ignoresSafeArea(.keyboard)
             .frame(maxHeight: 650)
+            .fullScreenCover(isPresented: $shouldShowHome) {
+                HomeView()
+            }
         }
         
     }
