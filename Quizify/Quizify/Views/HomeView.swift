@@ -33,6 +33,7 @@ struct HomeView: View {
                                 .resizable()
                                 .frame(width: 70, height: 70)
                         }
+                      
                         
                         
                         Spacer().frame(width: 50)
@@ -71,6 +72,7 @@ struct HomeView: View {
                                     }
                                 }
                             }
+                            .padding(.leading, 10)
                             .scrollIndicators(.hidden)
                             
                             
