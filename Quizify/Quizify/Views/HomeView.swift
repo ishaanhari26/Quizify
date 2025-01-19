@@ -48,7 +48,7 @@ struct HomeView: View {
                     }
                 }
                 
-                // Floating header with blur effect and enhanced shadow
+                // Floating header with increased blur effect and enhanced shadow
                 HStack {
                     Image(systemName: "text.justify")
                         .foregroundColor(.black)
@@ -56,11 +56,11 @@ struct HomeView: View {
                     
                     Spacer().frame(width: 50)
                     
-                
                     HStack(spacing: -10) {
                         Text("Quizify")
                             .font(.custom("Kiwi Maru Light", size: 30))
                             .foregroundColor(Color(.black))
+                            .kerning(-2) // Add negative kerning to squish letters together
                         
                         Image(.quzifyLogo)
                             .resizable()
@@ -79,23 +79,20 @@ struct HomeView: View {
                 .padding(.vertical, 15)
                 .background(
                     ZStack {
-                        Color.white.opacity(0.7)
+                        Color.white.opacity(0.6) // Reduced opacity
                         
-                        // Blur effect
+                        // Increased blur effect
                         Rectangle()
                             .fill(.white)
-                            .opacity(0.7)
+                            .opacity(0.6)
                             .background(.ultraThinMaterial)
-                            .blur(radius: 3)
+                            .blur(radius: 8) // Increased blur radius
                     }
                         .cornerRadius(30)
                 )
-                .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 5) // Enhanced shadow
+                .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 5)
                 .padding(.horizontal)
                 .padding(.top, 60)
-                
-                
-                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .ignoresSafeArea()
