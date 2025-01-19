@@ -8,7 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB04898A2CEA68780037BA6F /* NewSetView.swift */; };
-		CB04898D2CEA72EA0037BA6F /* Cheese.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB04898C2CEA72EA0037BA6F /* Cheese.swift */; };
+		CB3647592D0234C700B041F6 /* MongoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB3647582D0234C700B041F6 /* MongoSwift */; };
+		CB36475B2D0234C700B041F6 /* MongoSwiftSync in Frameworks */ = {isa = PBXBuildFile; productRef = CB36475A2D0234C700B041F6 /* MongoSwiftSync */; };
 		CB6602952CE66DCA004BD579 /* KiwiMaru-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25B2CE42A2F001F8ED0 /* KiwiMaru-Light.ttf */; };
 		CB6602962CE66DCA004BD579 /* KiwiMaru-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */; };
 		CB6602972CE66DCA004BD579 /* KiwiMaru-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */; };
@@ -43,7 +44,6 @@
 
 /* Begin PBXFileReference section */
 		CB04898A2CEA68780037BA6F /* NewSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSetView.swift; sourceTree = "<group>"; };
-		CB04898C2CEA72EA0037BA6F /* Cheese.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cheese.swift; sourceTree = "<group>"; };
 		CB6602982CE67605004BD579 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		CB66029A2CE6BF65004BD579 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CBECC2262CE42702001F8ED0 /* Quizify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quizify.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -68,6 +68,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB36475B2D0234C700B041F6 /* MongoSwiftSync in Frameworks */,
+				CB3647592D0234C700B041F6 /* MongoSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,7 +118,6 @@
 				CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */,
 				CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */,
 				CBECC2532CE4275A001F8ED0 /* Views */,
-				CB04898C2CEA72EA0037BA6F /* Cheese.swift */,
 				CBECC2292CE42702001F8ED0 /* QuizifyApp.swift */,
 				CBECC22D2CE42706001F8ED0 /* Assets.xcassets */,
 				CBECC22F2CE42706001F8ED0 /* Preview Content */,
@@ -249,6 +250,8 @@
 				Base,
 			);
 			mainGroup = CBECC21D2CE42702001F8ED0;
+			packageReferences = (
+			);
 			productRefGroup = CBECC2272CE42702001F8ED0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -297,7 +300,6 @@
 				CBECC2552CE4276E001F8ED0 /* GreetingView.swift in Sources */,
 				CBECC2572CE4277A001F8ED0 /* LoginView.swift in Sources */,
 				CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */,
-				CB04898D2CEA72EA0037BA6F /* Cheese.swift in Sources */,
 				CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */,
 				CBECC22A2CE42702001F8ED0 /* QuizifyApp.swift in Sources */,
 				CB6602992CE67605004BD579 /* SignupView.swift in Sources */,
@@ -464,7 +466,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Quizify/Preview Content\"";
-				DEVELOPMENT_TEAM = 939PU42YCA;
+				DEVELOPMENT_TEAM = W9G24PQCPH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Quizify/Info.plist;
@@ -494,7 +496,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Quizify/Preview Content\"";
-				DEVELOPMENT_TEAM = 939PU42YCA;
+				DEVELOPMENT_TEAM = W9G24PQCPH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Quizify/Info.plist;
@@ -632,6 +634,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CB3647572D0234C700B041F6 /* XCRemoteSwiftPackageReference "mongo-swift-driver" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mongodb/mongo-swift-driver.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CB3647582D0234C700B041F6 /* MongoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB3647572D0234C700B041F6 /* XCRemoteSwiftPackageReference "mongo-swift-driver" */;
+			productName = MongoSwift;
+		};
+		CB36475A2D0234C700B041F6 /* MongoSwiftSync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB3647572D0234C700B041F6 /* XCRemoteSwiftPackageReference "mongo-swift-driver" */;
+			productName = MongoSwiftSync;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CBECC21E2CE42702001F8ED0 /* Project object */;
 }
