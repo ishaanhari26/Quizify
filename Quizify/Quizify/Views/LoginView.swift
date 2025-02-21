@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import FirebaseCore
+import FirebaseAuth
 
 
 
@@ -105,6 +107,7 @@ struct LoginView: View {
                             .background(Color(hex: "#C97D60"))
                             .cornerRadius(20)
                             .foregroundColor(.white)
+                 
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 27)

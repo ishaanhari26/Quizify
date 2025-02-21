@@ -7,21 +7,53 @@
 
 import SwiftUI
 
+
+
+@MainActor
+final class SignInEmailViewModel : ObservableObject {
+    
+    @Published var email =  " "
+    @Published var password = " "
+    
+    init() {
+        
+    }
+    
+    func signIn() {
+        guard !email.isEmpty, !password.isEmpty else {
+            print("No email or password found")
+            return
+        }
+        
+        
+        Task{
+            do{
+                let returnedUserData =  try await AuthManager.shared.createUser(email: email, password: password)
+                print("Success")
+                print(returnedUserData)
+            }catch{
+                print("Error: \(error)")
+            }
+        }
+    }
+    
+    
+   
+}
+
 struct SignupView: View {
+    
+    @StateObject private var viewModel = SignInEmailViewModel()
     
     @Environment(\.dismiss) var dismiss
     @State private var name: String = ""
-    @State private var email: String = ""
-    @State private var password: String = ""
     @FocusState private var isNameFocused: Bool
     @FocusState private var isEmailFocused: Bool
     @FocusState private var isPasswordFocused: Bool
     @State private var shouldShowHome = false
-    
 
-    private var isFormValid: Bool {
-        !name.isEmpty && !email.isEmpty && !password.isEmpty
-    }
+    
+    
     
     
     var body: some View {
@@ -80,7 +112,7 @@ struct SignupView: View {
                             .focused($isNameFocused)
                         
                         
-                        TextField("Email", text: $email)
+                        TextField("Email", text: $viewModel.email)
                             .font(.custom("Kiwi Maru Regular", size: 18))
                             .frame(width: 297, height: 52)
                             .padding(.horizontal)
@@ -94,7 +126,7 @@ struct SignupView: View {
                             )
                             .focused($isEmailFocused)
                         
-                        TextField("Password", text: $password)
+                        TextField("Password", text: $viewModel.password)
                             .font(.custom("Kiwi Maru Regular", size: 18))
                             .frame(width: 297, height: 52)
                             .padding(.horizontal)
@@ -110,19 +142,15 @@ struct SignupView: View {
                         
                     }
                 
-                    Button(action: {
-                        if isFormValid {
-                            shouldShowHome = true
-                        }
-                    }) {
+                    Button{
+                        viewModel.signIn()
+                    }label: {
                         Text("Sign Up")
                             .font(.custom("Kiwi Maru Regular", size: 18))
                             .frame(width: 233, height: 43)
-                            .background(isFormValid ? Color(hex: "#C97D60") : Color.gray)
                             .cornerRadius(20)
                             .foregroundColor(.white)
                     }
-                    .disabled(!isFormValid)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 27)
                     
