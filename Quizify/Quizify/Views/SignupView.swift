@@ -97,22 +97,23 @@ struct SignupView: View {
                     VStack(spacing: 30){
                         
                         
-                        TextField("What is your Name?", text: $name)
-                            .font(.custom("Kiwi Maru Regular", size: 18))
-                            .frame(width: 297, height: 52)
-                            .padding(.horizontal)
-                            .background(Color(hex: "#CECECE").opacity(0.2))
-                            .cornerRadius(20)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color(hex: "#C97D60"),
-                                            lineWidth: isNameFocused ? 7 : 3)
-                                    .animation(.easeInOut(duration: 0.2), value: isNameFocused)
-                            )
-                            .focused($isNameFocused)
+//                        TextField("What is your Name?", text: $name)
+//                            .font(.custom("Kiwi Maru Regular", size: 18))
+//                            .frame(width: 297, height: 52)
+//                            .padding(.horizontal)
+//                            .background(Color(hex: "#CECECE").opacity(0.2))
+//                            .cornerRadius(20)
+//                            .overlay(
+//                                RoundedRectangle(cornerRadius: 20)
+//                                    .stroke(Color(hex: "#C97D60"),
+//                                            lineWidth: isNameFocused ? 7 : 3)
+//                                    .animation(.easeInOut(duration: 0.2), value: isNameFocused)
+//                            )
+//                            .focused($isNameFocused)
                         
                         
                         TextField("Email", text: $viewModel.email)
+                            .textInputAutocapitalization(.never)
                             .font(.custom("Kiwi Maru Regular", size: 18))
                             .frame(width: 297, height: 52)
                             .padding(.horizontal)
@@ -142,17 +143,20 @@ struct SignupView: View {
                         
                     }
                 
-                    Button{
+                    
+                    Button {
                         viewModel.signIn()
-                    }label: {
-                        Text("Sign Up")
+                    } label: {
+                        Text("Create Account")
                             .font(.custom("Kiwi Maru Regular", size: 18))
                             .frame(width: 233, height: 43)
+                            .background(Color(hex: "#C97D60"))
                             .cornerRadius(20)
                             .foregroundColor(.white)
+                        
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 27)
+                    .padding(.top, 35)
                     
         
             
