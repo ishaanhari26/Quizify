@@ -156,7 +156,7 @@ struct LoginView: View {
             .ignoresSafeArea(.keyboard)
             .frame(maxHeight: 650)
             .fullScreenCover(isPresented: $shouldShowHome) {
-                HomeView()
+                HomeView(showHomeView: $shouldShowHome)
             }
         }
         

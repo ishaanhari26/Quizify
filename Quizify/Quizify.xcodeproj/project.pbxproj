@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB04898A2CEA68780037BA6F /* NewSetView.swift */; };
+		CB4DEF9F2D6964C9003A001A /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4DEF9E2D6964C9003A001A /* RootView.swift */; };
 		CB6602952CE66DCA004BD579 /* KiwiMaru-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25B2CE42A2F001F8ED0 /* KiwiMaru-Light.ttf */; };
 		CB6602962CE66DCA004BD579 /* KiwiMaru-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */; };
 		CB6602972CE66DCA004BD579 /* KiwiMaru-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */; };
@@ -47,6 +48,7 @@
 
 /* Begin PBXFileReference section */
 		CB04898A2CEA68780037BA6F /* NewSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSetView.swift; sourceTree = "<group>"; };
+		CB4DEF9E2D6964C9003A001A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		CB6602982CE67605004BD579 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		CB66029A2CE6BF65004BD579 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CB8332822D6913EE00ACDC99 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
@@ -170,6 +172,7 @@
 			isa = PBXGroup;
 			children = (
 				CBECC2542CE4276E001F8ED0 /* GreetingView.swift */,
+				CB4DEF9E2D6964C9003A001A /* RootView.swift */,
 				CBECC2562CE4277A001F8ED0 /* LoginView.swift */,
 				CB66029A2CE6BF65004BD579 /* HomeView.swift */,
 				CB04898A2CEA68780037BA6F /* NewSetView.swift */,
@@ -315,6 +318,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB4DEF9F2D6964C9003A001A /* RootView.swift in Sources */,
 				CBECC2552CE4276E001F8ED0 /* GreetingView.swift in Sources */,
 				CB8332832D6913EE00ACDC99 /* AuthManager.swift in Sources */,
 				CBECC2572CE4277A001F8ED0 /* LoginView.swift in Sources */,

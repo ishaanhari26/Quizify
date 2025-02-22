@@ -168,7 +168,7 @@ struct SignupView: View {
         
             .ignoresSafeArea(.keyboard)
             .fullScreenCover(isPresented: $shouldShowHome) {
-                HomeView()
+                HomeView(showHomeView: $shouldShowHome)
             }
             .frame(maxHeight: 650)
         }

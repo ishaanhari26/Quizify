@@ -7,14 +7,100 @@
 
 import SwiftUI
 
+@MainActor
+final class SettingsViewModel : ObservableObject {
+    func logOut() throws {
+        try AuthManager.shared.signOut()
+    }
+}
+
 struct HomeView: View {
     @State private var showMenu = false
+    @StateObject private var viewModel = SettingsViewModel()
+    @Binding  var showHomeView : Bool
+    
+    // MARK: - Side Menu Item View
+    private struct SideMenuItem: View {
+        let title: String
+        let icon: String
+        let action: () -> Void
+        
+        var body: some View {
+            Button(action: action) {
+                HStack(spacing: 15) {
+                    Image(systemName: icon)
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(hex: "#C97D60"))
+                    Text(title)
+                        .font(.custom("Kiwi Maru Light", size: 16))
+                        .foregroundColor(.black)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Side Menu Content
+    private var sideMenuContent: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Image(.quzifyLogo)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                Text("Quizify")
+                    .font(.custom("Kiwi Maru Medium", size: 24))
+                    .foregroundColor(Color(hex: "#C97D60"))
+            }
+            .padding(.top, 50)
+            .padding(.horizontal)
+            
+            Divider()
+                .padding(.top)
+            
+            VStack(alignment: .leading, spacing: 20) {
+                NavigationLink(destination: Text("Profile View")) {
+                    SideMenuItem(title: "Profile", icon: "person.fill") {}
+                }
+                
+                NavigationLink(destination: Text("My Sets View")) {
+                    SideMenuItem(title: "My Sets", icon: "folder.fill") {}
+                }
+                
+                NavigationLink(destination: Text("Settings View")) {
+                    SideMenuItem(title: "Settings", icon: "gear") {}
+                }
+                
+                NavigationLink(destination: Text("Help View")) {
+                    SideMenuItem(title: "Help", icon: "questionmark.circle.fill") {}
+                }
+            }
+            .padding(.top, 40)
+            .padding(.horizontal)
+            
+            Spacer()
+            
+            Divider()
+            SideMenuItem(title: "Sign Out", icon: "arrow.right.square.fill") {
+                Task {
+                    do {
+                        try viewModel.logOut()
+                        showHomeView = true
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+            .padding()
+            .padding(.bottom, 15)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(Color.white)
+    }
     
     var body: some View {
         ZStack(alignment: .leading) {
             // Side Menu
             GeometryReader { _ in
-                SideMenuView()
+                sideMenuContent
                     .frame(width: 270)
                     .offset(x: showMenu ? 0 : -270)
                     .background(showMenu ? Color.white : Color.clear)
@@ -78,7 +164,6 @@ struct HomeView: View {
                                     .contentShape(Rectangle())
                             }
                             
-                            // Center content with fixed spacing
                             Spacer()
                             
                             // Quizify logo and text
@@ -133,61 +218,6 @@ struct HomeView: View {
     }
 }
 
-struct SideMenuView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Image(.quzifyLogo)
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                Text("Quizify")
-                    .font(.custom("Kiwi Maru Medium", size: 24))
-                    .foregroundColor(Color(hex: "#C97D60"))
-            }
-            .padding(.top, 50)
-            .padding(.horizontal)
-            
-            Divider()
-                .padding(.top)
-            
-            VStack(alignment: .leading, spacing: 20) {
-                MenuButton(title: "Profile", icon: "person.fill")
-                MenuButton(title: "My Sets", icon: "folder.fill")
-                MenuButton(title: "Settings", icon: "gear")
-                MenuButton(title: "Help", icon: "questionmark.circle.fill")
-            }
-            .padding(.top, 40)
-            .padding(.horizontal)
-            
-            Spacer()
-            
-            Divider()
-            MenuButton(title: "Sign Out", icon: "arrow.right.square.fill")
-                .padding()
-                .padding(.bottom, 15)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(Color.white)
-    }
-}
-
-struct MenuButton: View {
-    let title: String
-    let icon: String
-    
-    var body: some View {
-        Button(action: {}) {
-            HStack(spacing: 15) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(Color(hex: "#C97D60"))
-                Text(title)
-                    .font(.custom("Kiwi Maru Light", size: 16))
-                    .foregroundColor(.black)
-            }
-        }
-    }
-}
 #Preview {
-    HomeView()
+    HomeView(showHomeView: .constant(false))
 }
