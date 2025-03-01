@@ -17,7 +17,7 @@ final class SettingsViewModel : ObservableObject {
 struct HomeView: View {
     @State private var showMenu = false
     @StateObject private var viewModel = SettingsViewModel()
-    @Binding  var showHomeView : Bool
+    @Binding var goToGreet: Bool
     
     // MARK: - Side Menu Item View
     private struct SideMenuItem: View {
@@ -83,7 +83,7 @@ struct HomeView: View {
                 Task {
                     do {
                         try viewModel.logOut()
-                        showHomeView = true
+                        goToGreet = true  // This will dismiss the HomeView and show the GreetingView
                     } catch {
                         print(error)
                     }
@@ -122,6 +122,8 @@ struct HomeView: View {
                                 .padding(.leading, 30)
                                 .padding(.bottom, 10)
                             
+                            
+                            //Make half to show this is a scroll element
                             ScrollView(.horizontal) {
                                 HStack(spacing: 20) {
                                     ForEach(0..<10) {
@@ -219,5 +221,5 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView(showHomeView: .constant(false))
+    HomeView(goToGreet: .constant(false))
 }

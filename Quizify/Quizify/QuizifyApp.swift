@@ -19,7 +19,7 @@ struct QuizifyApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+            GreetingView()
         }
     }
 }

@@ -12,8 +12,8 @@ import SwiftUI
 @MainActor
 final class SignInEmailViewModel : ObservableObject {
     
-    @Published var email =  " "
-    @Published var password = " "
+    @Published var email =  ""
+    @Published var password = ""
     
     init() {
         
@@ -168,7 +168,7 @@ struct SignupView: View {
         
             .ignoresSafeArea(.keyboard)
             .fullScreenCover(isPresented: $shouldShowHome) {
-                HomeView(showHomeView: $shouldShowHome)
+                HomeView(goToGreet: $shouldShowHome)
             }
             .frame(maxHeight: 650)
         }

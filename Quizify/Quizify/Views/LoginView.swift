@@ -10,6 +10,39 @@ import FirebaseCore
 import FirebaseAuth
 
 
+@MainActor
+final class LoginEmailViewModel : ObservableObject {
+    
+    @Published var email = ""
+    @Published var password = ""
+    @Published var isAuthenticated = false
+    @Published var errorMessage = ""
+    @Published var shouldShowHome = false
+    
+    init() {
+        
+    }
+    
+    func logIn() async {
+        guard !email.isEmpty, !password.isEmpty else {
+            errorMessage = "Email and password cannot be empty"
+            return
+        }
+        
+        do {
+            let returnedUserData = try await AuthManager.shared.loginUser(email: email, password: password)
+            isAuthenticated = true
+            shouldShowHome = true
+            print("Logged in successfully")
+            print(returnedUserData)
+        } catch {
+            isAuthenticated = false
+            errorMessage = error.localizedDescription
+            print("Error: \(error)")
+        }
+    }
+}
+
 
 struct CircularImageModifier: ViewModifier {
     func body(content: Content) -> some View {
@@ -21,12 +54,12 @@ struct CircularImageModifier: ViewModifier {
 
 
 struct LoginView: View {
+    
+    @StateObject private var viewModel = LoginEmailViewModel()
+    
     @Environment(\.dismiss) var dismiss
-    @State private var email: String = ""
-    @State private var password: String = ""
     @FocusState private var isEmailFocused: Bool
     @FocusState private var isPasswordFocused: Bool
-    @State private var shouldShowHome = false
     
     var body: some View {
         NavigationView{
@@ -69,7 +102,8 @@ struct LoginView: View {
                     
                     
                     VStack(spacing: 30) {
-                        TextField("Email", text: $email)
+                        TextField("Email", text: $viewModel.email)
+                            .textInputAutocapitalization(.never)
                             .font(.custom("Kiwi Maru Regular", size: 18))
                             .frame(width: 297, height: 52)
                             .padding(.horizontal)
@@ -83,7 +117,7 @@ struct LoginView: View {
                             )
                             .focused($isEmailFocused)
                         
-                        TextField("Password", text: $password)
+                        TextField("Password", text: $viewModel.password)
                             .font(.custom("Kiwi Maru Regular", size: 18))
                             .frame(width: 297, height: 52)
                             .padding(.horizontal)
@@ -98,8 +132,11 @@ struct LoginView: View {
                             .focused($isPasswordFocused)
                     }
                     
+                   
                     Button(action: {
-                        shouldShowHome = true
+                        Task {
+                            await viewModel.logIn()
+                        }
                     }) {
                         Text("Login")
                             .font(.custom("Kiwi Maru Regular", size: 18))
@@ -107,7 +144,6 @@ struct LoginView: View {
                             .background(Color(hex: "#C97D60"))
                             .cornerRadius(20)
                             .foregroundColor(.white)
-                 
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 27)
@@ -146,7 +182,12 @@ struct LoginView: View {
                         .modifier(CircularImageModifier())
                       
                         
-                    
+                    if !viewModel.errorMessage.isEmpty {
+                        Text(viewModel.errorMessage)
+                            .foregroundColor(.red)
+                            .font(.custom("Kiwi Maru Regular", size: 14))
+                            .padding(.top, 10)
+                    }
                      
                     
                     Spacer()
@@ -155,8 +196,8 @@ struct LoginView: View {
             }
             .ignoresSafeArea(.keyboard)
             .frame(maxHeight: 650)
-            .fullScreenCover(isPresented: $shouldShowHome) {
-                HomeView(showHomeView: $shouldShowHome)
+            .fullScreenCover(isPresented: $viewModel.shouldShowHome) {
+                HomeView(goToGreet: $viewModel.shouldShowHome)
             }
         }
         
