@@ -18,6 +18,7 @@ struct HomeView: View {
     @State private var showMenu = false
     @StateObject private var viewModel = SettingsViewModel()
     @Binding var goToGreet: Bool
+    @State private var navigateToGreet = false
     
     // MARK: - Side Menu Item View
     private struct SideMenuItem: View {
@@ -83,7 +84,7 @@ struct HomeView: View {
                 Task {
                     do {
                         try viewModel.logOut()
-                        goToGreet = true  // This will dismiss the HomeView and show the GreetingView
+                        navigateToGreet = true  // Navigate to GreetingView instead of dismissing
                     } catch {
                         print(error)
                     }
@@ -210,6 +211,10 @@ struct HomeView: View {
                         .padding(.horizontal)
                     }
                     .frame(height: 100)
+                }
+                .navigationDestination(isPresented: $navigateToGreet) {
+                    GreetingView()
+                        .navigationBarBackButtonHidden(true)
                 }
             }
             .offset(x: showMenu ? 270 : 0)
