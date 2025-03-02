@@ -13,6 +13,11 @@
 		CB6602972CE66DCA004BD579 /* KiwiMaru-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */; };
 		CB6602992CE67605004BD579 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6602982CE67605004BD579 /* SignupView.swift */; };
 		CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB66029A2CE6BF65004BD579 /* HomeView.swift */; };
+		CB8332832D6913EE00ACDC99 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8332822D6913EE00ACDC99 /* AuthManager.swift */; };
+		CB8E36C82D5E7A0500A96E3A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CB8E36C72D5E7A0500A96E3A /* FirebaseAnalytics */; };
+		CB8E36CA2D5E7A0500A96E3A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB8E36C92D5E7A0500A96E3A /* FirebaseAuth */; };
+		CBAE4E9C2D63C37800D348E3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBAE4E9B2D63C37800D348E3 /* GoogleService-Info.plist */; };
+		CBDD1F222D6665C0004EC398 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CBDD1F212D6665C0004EC398 /* FirebaseAuth */; };
 		CBECC22A2CE42702001F8ED0 /* QuizifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBECC2292CE42702001F8ED0 /* QuizifyApp.swift */; };
 		CBECC22E2CE42706001F8ED0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBECC22D2CE42706001F8ED0 /* Assets.xcassets */; };
 		CBECC2312CE42706001F8ED0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBECC2302CE42706001F8ED0 /* Preview Assets.xcassets */; };
@@ -44,6 +49,8 @@
 		CB04898A2CEA68780037BA6F /* NewSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSetView.swift; sourceTree = "<group>"; };
 		CB6602982CE67605004BD579 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		CB66029A2CE6BF65004BD579 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		CB8332822D6913EE00ACDC99 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		CBAE4E9B2D63C37800D348E3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CBECC2262CE42702001F8ED0 /* Quizify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quizify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBECC2292CE42702001F8ED0 /* QuizifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizifyApp.swift; sourceTree = "<group>"; };
 		CBECC22D2CE42706001F8ED0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -66,6 +73,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB8E36C82D5E7A0500A96E3A /* FirebaseAnalytics in Frameworks */,
+				CBDD1F222D6665C0004EC398 /* FirebaseAuth in Frameworks */,
+				CB8E36CA2D5E7A0500A96E3A /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,12 +96,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CBDD1F202D6665C0004EC398 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		CBECC21D2CE42702001F8ED0 = {
 			isa = PBXGroup;
 			children = (
 				CBECC2282CE42702001F8ED0 /* Quizify */,
 				CBECC2392CE42706001F8ED0 /* QuizifyTests */,
 				CBECC2432CE42707001F8ED0 /* QuizifyUITests */,
+				CBDD1F202D6665C0004EC398 /* Frameworks */,
 				CBECC2272CE42702001F8ED0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -113,8 +131,10 @@
 				CBECC25B2CE42A2F001F8ED0 /* KiwiMaru-Light.ttf */,
 				CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */,
 				CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */,
+				CBAE4E9B2D63C37800D348E3 /* GoogleService-Info.plist */,
 				CBECC2532CE4275A001F8ED0 /* Views */,
 				CBECC2292CE42702001F8ED0 /* QuizifyApp.swift */,
+				CB8332822D6913EE00ACDC99 /* AuthManager.swift */,
 				CBECC22D2CE42706001F8ED0 /* Assets.xcassets */,
 				CBECC22F2CE42706001F8ED0 /* Preview Content */,
 			);
@@ -222,7 +242,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					CBECC2252CE42702001F8ED0 = {
 						CreatedOnToolsVersion = 15.4;
@@ -247,6 +267,7 @@
 			);
 			mainGroup = CBECC21D2CE42702001F8ED0;
 			packageReferences = (
+				CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = CBECC2272CE42702001F8ED0 /* Products */;
 			projectDirPath = "";
@@ -269,6 +290,7 @@
 				CB6602972CE66DCA004BD579 /* KiwiMaru-Regular.ttf in Resources */,
 				CBECC2312CE42706001F8ED0 /* Preview Assets.xcassets in Resources */,
 				CBECC22E2CE42706001F8ED0 /* Assets.xcassets in Resources */,
+				CBAE4E9C2D63C37800D348E3 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,6 +316,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CBECC2552CE4276E001F8ED0 /* GreetingView.swift in Sources */,
+				CB8332832D6913EE00ACDC99 /* AuthManager.swift in Sources */,
 				CBECC2572CE4277A001F8ED0 /* LoginView.swift in Sources */,
 				CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */,
 				CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */,
@@ -517,7 +540,6 @@
 		CBECC24E2CE42707001F8ED0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -537,7 +559,6 @@
 		CBECC24F2CE42707001F8ED0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -557,7 +578,6 @@
 		CBECC2512CE42707001F8ED0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W9G24PQCPH;
@@ -575,7 +595,6 @@
 		CBECC2522CE42707001F8ED0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W9G24PQCPH;
@@ -630,6 +649,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.8.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CB8E36C72D5E7A0500A96E3A /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		CB8E36C92D5E7A0500A96E3A /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		CBDD1F212D6665C0004EC398 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CBECC21E2CE42702001F8ED0 /* Project object */;
 }

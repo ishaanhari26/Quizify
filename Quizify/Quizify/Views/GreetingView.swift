@@ -66,9 +66,10 @@ struct GreetingView: View {
     ]
     @State private var showLoginSheet = false
     @State private var showSignupSheet = false
-
+    @State private var navigateToHomeView = false
+    
     var body: some View {
-        NavigationView(){
+        NavigationStack {
             ZStack{
                 
                 //Background Color
@@ -99,7 +100,7 @@ struct GreetingView: View {
                         .padding(.horizontal, 20)
                         .frame(height: 150)
                         .multilineTextAlignment(.center)
-                   
+                    
                     Spacer().frame(height: 85)
                     
                     HStack(){
@@ -119,7 +120,7 @@ struct GreetingView: View {
                                 )
                         }
                         .sheet(isPresented: $showLoginSheet) {
-                            LoginView()
+                            LoginView(goToHome: $navigateToHomeView)
                                 .presentationDetents([.height(745)])
                                 .presentationBackgroundInteraction(.enabled)
                                 .presentationCornerRadius(40)
@@ -128,7 +129,7 @@ struct GreetingView: View {
                         Button(action: {
                             showSignupSheet = true
                         }) {
-                        
+                            
                             Text("Sign Up")
                                 .font(.custom("Kiwi Maru Medium", size: 18))
                                 .frame(width: 175, height: 52)
@@ -141,32 +142,21 @@ struct GreetingView: View {
                                 )
                         }
                         .sheet(isPresented: $showSignupSheet) {
-                            SignupView()
+                            SignupView(goToHome: $navigateToHomeView)
                                 .presentationDetents([.height(745)])
                                 .presentationBackgroundInteraction(.enabled)
                                 .presentationCornerRadius(40)
                         }
-
-                        
-
                     }
-                 
-                    
-                    
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                
-                
-                
-                
-                
             }
             .preferredColorScheme(.light)
-            
+            .navigationDestination(isPresented: $navigateToHomeView) {
+                HomeView(goToGreet: $navigateToHomeView)
+                    .navigationBarBackButtonHidden(true)
+            }
         }
-        
-        
-        
     }
 }
 
