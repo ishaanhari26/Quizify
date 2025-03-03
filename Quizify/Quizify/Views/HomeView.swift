@@ -131,8 +131,8 @@ struct HomeView: View {
                                         Text("Item \($0)")
                                             .foregroundStyle(.white)
                                             .font(.largeTitle)
-                                            .frame(width: 190, height: 145)
-                                            .background(Color(hex: "#C97D60"))
+                                            .frame(width: 160, height: 145)
+                                            .background(Color(hex: "#edae95"))
                                             .cornerRadius(15)
                                     }
                                 }
@@ -147,6 +147,13 @@ struct HomeView: View {
                                     .font(.custom("Kiwi Maru Light", size: 25))
                                     .foregroundColor(Color(.gray))
                                     .padding(.leading, 30)
+                                
+//                                Rectangle()
+//                                    .frame(width: 200, height: 200)
+//                                    .foregroundColor(Color(hex: "#edae95"))
+//                                    .cornerRadius(20)
+                                
+                                
                             }
                         }
                     }
@@ -207,7 +214,7 @@ struct HomeView: View {
                             }
                                 .cornerRadius(30)
                         )
-                        .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 5)
+                        .shadow(color: Color.black.opacity(0.2), radius: 15, x: 0, y: 5)
                         .padding(.horizontal)
                     }
                     .frame(height: 100)
