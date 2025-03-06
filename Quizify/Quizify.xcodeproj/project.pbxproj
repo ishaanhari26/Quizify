@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -67,6 +67,10 @@
 		CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "KiwiMaru-Medium.ttf"; sourceTree = "<group>"; };
 		CBECC25D2CE42A54001F8ED0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		CB1D3D202D766E3B00474C31 /* DeckCreateViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = DeckCreateViews; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		CBECC2232CE42702001F8ED0 /* Frameworks */ = {
@@ -173,6 +177,7 @@
 				CBECC2562CE4277A001F8ED0 /* LoginView.swift */,
 				CB6602982CE67605004BD579 /* SignupView.swift */,
 				CB66029A2CE6BF65004BD579 /* HomeView.swift */,
+				CB1D3D202D766E3B00474C31 /* DeckCreateViews */,
 				CB04898A2CEA68780037BA6F /* NewSetView.swift */,
 			);
 			path = Views;
@@ -192,6 +197,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CB1D3D202D766E3B00474C31 /* DeckCreateViews */,
 			);
 			name = Quizify;
 			productName = Quizify;
