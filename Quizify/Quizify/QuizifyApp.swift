@@ -15,6 +15,7 @@ import FirebaseAuth
 struct QuizifyApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject var dataManager = DataManager()
     
     
     var body: some Scene {

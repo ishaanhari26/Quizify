@@ -59,24 +59,51 @@ struct HomeView: View {
             
             VStack(alignment: .leading, spacing: 20) {
                 NavigationLink(destination: Text("Profile View")) {
-                    SideMenuItem(title: "Profile", icon: "person.fill") {}
+                    HStack(spacing: 15) {
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("Profile")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
                 }
                 
-                NavigationLink(destination: Text("My Sets View")) {
-                    SideMenuItem(title: "My Sets", icon: "folder.fill") {}
+                NavigationLink(destination: SetsListView()) {
+                    HStack(spacing: 15) {
+                        Image(systemName: "folder.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("My Sets")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
                 }
                 
                 NavigationLink(destination: Text("Settings View")) {
-                    SideMenuItem(title: "Settings", icon: "gear") {}
+                    HStack(spacing: 15) {
+                        Image(systemName: "gear")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("Settings")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
                 }
                 
                 NavigationLink(destination: Text("Help View")) {
-                    SideMenuItem(title: "Help", icon: "questionmark.circle.fill") {}
+                    HStack(spacing: 15) {
+                        Image(systemName: "questionmark.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("Help")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
                 }
             }
             .padding(.top, 40)
             .padding(.horizontal)
-            
             Spacer()
             
             Divider()

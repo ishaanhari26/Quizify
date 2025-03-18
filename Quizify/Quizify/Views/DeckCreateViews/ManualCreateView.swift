@@ -11,6 +11,7 @@ struct FlashCard: Identifiable {
     let id = UUID()
     var term: String = ""
     var definition: String = ""
+    
 }
 
 struct ManualCreateView: View {

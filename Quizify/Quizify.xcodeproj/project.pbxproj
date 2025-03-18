@@ -13,6 +13,12 @@
 		CB6602972CE66DCA004BD579 /* KiwiMaru-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */; };
 		CB6602992CE67605004BD579 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6602982CE67605004BD579 /* SignupView.swift */; };
 		CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB66029A2CE6BF65004BD579 /* HomeView.swift */; };
+		CB82DE5C2D89E4E700E73551 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB82DE5B2D89E4E700E73551 /* Card.swift */; };
+		CB82DE5E2D89E57300E73551 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB82DE5D2D89E57300E73551 /* DataManager.swift */; };
+		CB82DE602D89E8FC00E73551 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CB82DE5F2D89E8FC00E73551 /* FirebaseFirestore */; };
+		CB82DE622D89E9FF00E73551 /* SetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB82DE612D89E9FF00E73551 /* SetsListView.swift */; };
+		CB82DE642D89F1A000E73551 /* TestAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB82DE632D89F1A000E73551 /* TestAddView.swift */; };
+		CB82DE662D89F5ED00E73551 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB82DE652D89F5ED00E73551 /* Set.swift */; };
 		CB8332832D6913EE00ACDC99 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8332822D6913EE00ACDC99 /* AuthManager.swift */; };
 		CB8E36C82D5E7A0500A96E3A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CB8E36C72D5E7A0500A96E3A /* FirebaseAnalytics */; };
 		CB8E36CA2D5E7A0500A96E3A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB8E36C92D5E7A0500A96E3A /* FirebaseAuth */; };
@@ -49,6 +55,11 @@
 		CB04898A2CEA68780037BA6F /* NewSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSetView.swift; sourceTree = "<group>"; };
 		CB6602982CE67605004BD579 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		CB66029A2CE6BF65004BD579 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		CB82DE5B2D89E4E700E73551 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		CB82DE5D2D89E57300E73551 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
+		CB82DE612D89E9FF00E73551 /* SetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetsListView.swift; sourceTree = "<group>"; };
+		CB82DE632D89F1A000E73551 /* TestAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAddView.swift; sourceTree = "<group>"; };
+		CB82DE652D89F5ED00E73551 /* Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		CB8332822D6913EE00ACDC99 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		CBAE4E9B2D63C37800D348E3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CBECC2262CE42702001F8ED0 /* Quizify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quizify.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -78,6 +89,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB8E36C82D5E7A0500A96E3A /* FirebaseAnalytics in Frameworks */,
+				CB82DE602D89E8FC00E73551 /* FirebaseFirestore in Frameworks */,
 				CBDD1F222D6665C0004EC398 /* FirebaseAuth in Frameworks */,
 				CB8E36CA2D5E7A0500A96E3A /* FirebaseAuth in Frameworks */,
 			);
@@ -139,6 +151,9 @@
 				CBECC2292CE42702001F8ED0 /* QuizifyApp.swift */,
 				CBECC2532CE4275A001F8ED0 /* Views */,
 				CB8332822D6913EE00ACDC99 /* AuthManager.swift */,
+				CB82DE5B2D89E4E700E73551 /* Card.swift */,
+				CB82DE5D2D89E57300E73551 /* DataManager.swift */,
+				CB82DE652D89F5ED00E73551 /* Set.swift */,
 				CBECC22D2CE42706001F8ED0 /* Assets.xcassets */,
 				CBECC22F2CE42706001F8ED0 /* Preview Content */,
 			);
@@ -177,6 +192,8 @@
 				CBECC2562CE4277A001F8ED0 /* LoginView.swift */,
 				CB6602982CE67605004BD579 /* SignupView.swift */,
 				CB66029A2CE6BF65004BD579 /* HomeView.swift */,
+				CB82DE612D89E9FF00E73551 /* SetsListView.swift */,
+				CB82DE632D89F1A000E73551 /* TestAddView.swift */,
 				CB1D3D202D766E3B00474C31 /* DeckCreateViews */,
 				CB04898A2CEA68780037BA6F /* NewSetView.swift */,
 			);
@@ -323,10 +340,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB82DE642D89F1A000E73551 /* TestAddView.swift in Sources */,
 				CBECC2552CE4276E001F8ED0 /* GreetingView.swift in Sources */,
+				CB82DE662D89F5ED00E73551 /* Set.swift in Sources */,
+				CB82DE5E2D89E57300E73551 /* DataManager.swift in Sources */,
+				CB82DE5C2D89E4E700E73551 /* Card.swift in Sources */,
 				CB8332832D6913EE00ACDC99 /* AuthManager.swift in Sources */,
 				CBECC2572CE4277A001F8ED0 /* LoginView.swift in Sources */,
 				CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */,
+				CB82DE622D89E9FF00E73551 /* SetsListView.swift in Sources */,
 				CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */,
 				CBECC22A2CE42702001F8ED0 /* QuizifyApp.swift in Sources */,
 				CB6602992CE67605004BD579 /* SignupView.swift in Sources */,
@@ -670,6 +692,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		CB82DE5F2D89E8FC00E73551 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		CB8E36C72D5E7A0500A96E3A /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
