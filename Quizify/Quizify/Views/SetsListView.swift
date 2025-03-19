@@ -10,73 +10,123 @@ import SwiftUI
 struct SetsListView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var showCreateSetSheet = false
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationView {
-            VStack {
+        ZStack {
+            // Background color
+            Color.white.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Custom header
+                headerView
+                
+                // Content
                 if dataManager.sets.isEmpty {
-                    ContentUnavailableView(
-                        "No Sets",
-                        systemImage: "folder.badge.questionmark",
-                        description: Text("Create your first set to get started")
-                    )
-                    .padding()
+                    emptyStateView
                 } else {
-                    List {
-                        ForEach(dataManager.sets) { set in
-                            NavigationLink(destination: SetDetailView(setID: set.id, setTitle: set.title)) {
-                                HStack(spacing: 15) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(Color(hex: "#edae95"))
-                                            .frame(width: 60, height: 60)
-                                        
-                                        Text("\(set.cardCount)")
-                                            .font(.custom("Kiwi Maru Medium", size: 20))
-                                            .foregroundColor(.white)
-                                    }
-                                    
-                                    VStack(alignment: .leading, spacing: 5) {
-                                        Text(set.title)
-                                            .font(.custom("Kiwi Maru Regular", size: 18))
-                                            .foregroundColor(.primary)
-                                        
-                                        if let description = set.description, !description.isEmpty {
-                                            Text(description)
-                                                .font(.custom("Kiwi Maru Light", size: 14))
-                                                .foregroundColor(.secondary)
-                                                .lineLimit(1)
-                                        }
-                                        
-                                        Text("\(set.cardCount) cards")
-                                            .font(.custom("Kiwi Maru Light", size: 14))
-                                            .foregroundColor(Color(hex: "#C97D60"))
-                                    }
-                                }
-                                .padding(.vertical, 8)
-                            }
-                        }
-                        .onDelete(perform: deleteSet)
-                    }
+                    setsList
                 }
             }
-            .navigationTitle("My Sets")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+        }
+        .sheet(isPresented: $showCreateSetSheet) {
+            ManualCreateView()
+                .environmentObject(dataManager)
+        }
+        .onAppear {
+            dataManager.fetchSets()
+        }
+        .navigationBarBackButtonHidden(true)
+    }
+    
+    // MARK: - Component Views
+    
+    private var headerView: some View {
+        ZStack {
+            Color(hex: "#C97D60").ignoresSafeArea(edges: .top)
+            
+            VStack {
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .font(.system(size: 22))
+                    }
+                    .padding(.leading, 20)
+                    
+                    Spacer()
+                    
+                    Text("My Sets")
+                        .font(.custom("Kiwi Maru Medium", size: 25))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
                     Button(action: {
                         showCreateSetSheet = true
                     }) {
                         Image(systemName: "plus")
+                            .foregroundColor(.white)
+                            .font(.system(size: 22))
                     }
+                    .padding(.trailing, 20)
+                }
+                .padding(.top, 25)
+                .padding(.bottom, 15)
+            }
+        }
+        .frame(height: 75)
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 25) {
+            Spacer()
+            
+            Image(systemName: "folder.badge.questionmark")
+                .font(.system(size: 70))
+                .foregroundColor(Color(hex: "#C97D60").opacity(0.7))
+            
+            Text("No Sets")
+                .font(.custom("Kiwi Maru Regular", size: 24))
+                .foregroundColor(Color.gray)
+            
+            Text("Create your first set to get started")
+                .font(.custom("Kiwi Maru Light", size: 18))
+                .foregroundColor(Color.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            Button(action: {
+                showCreateSetSheet = true
+            }) {
+                Text("Create Set")
+                    .font(.custom("Kiwi Maru Regular", size: 18))
+                    .frame(width: 170, height: 43)
+                    .background(Color(hex: "#C97D60"))
+                    .cornerRadius(20)
+                    .foregroundColor(.white)
+            }
+            .padding(.top, 20)
+            .shadow(color: Color(hex: "#C97D60").opacity(0.5), radius: 5, x: 0, y: 5)
+            
+            Spacer()
+        }
+        .padding()
+    }
+    
+    private var setsList: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                ForEach(dataManager.sets) { set in
+                    NavigationLink(destination: SetDetailView(setID: set.id, setTitle: set.title)) {
+                        SetCardView(set: set)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
-            .sheet(isPresented: $showCreateSetSheet) {
-                ManualCreateView()
-                    .environmentObject(dataManager)
-            }
-            .onAppear {
-                dataManager.fetchSets()
-            }
+            .padding(.horizontal)
+            .padding(.top, 20)
+            .padding(.bottom, 100)
         }
     }
     
@@ -87,47 +137,186 @@ struct SetsListView: View {
     }
 }
 
+// Custom Set Card View component
+struct SetCardView: View {
+    let set: Set
+    
+    var body: some View {
+        HStack(spacing: 15) {
+            // Card count indicator
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color(hex: "#edae95"))
+                    .frame(width: 70, height: 70)
+                
+                VStack(spacing: 2) {
+                    Text("\(set.cardCount)")
+                        .font(.custom("Kiwi Maru Medium", size: 22))
+                        .foregroundColor(.white)
+                    
+                    Text("cards")
+                        .font(.custom("Kiwi Maru Light", size: 14))
+                        .foregroundColor(.white)
+                }
+            }
+            
+            // Set details
+            VStack(alignment: .leading, spacing: 8) {
+                Text(set.title)
+                    .font(.custom("Kiwi Maru Regular", size: 18))
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                
+                if let description = set.description, !description.isEmpty {
+                    Text(description)
+                        .font(.custom("Kiwi Maru Light", size: 14))
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+                
+                // Date formatter
+                Text(formattedDate(set.createdAt))
+                    .font(.custom("Kiwi Maru Light", size: 12))
+                    .foregroundColor(Color(hex: "#C97D60"))
+            }
+            .padding(.vertical, 10)
+            
+            Spacer()
+            
+            // Chevron indicator
+            Image(systemName: "chevron.right")
+                .foregroundColor(Color(hex: "#C97D60"))
+                .font(.system(size: 14))
+                .padding(.trailing, 5)
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 15)
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+    }
+    
+    // Format the date for display
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter.string(from: date)
+    }
+}
+
 // This view shows the details of a set and its cards
 struct SetDetailView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var cards: [Card] = []
     @State private var isLoading = true
+    @Environment(\.dismiss) var dismiss
     
     let setID: String
     let setTitle: String
     
     var body: some View {
-        VStack {
-            if isLoading {
-                ProgressView("Loading cards...")
-            } else if cards.isEmpty {
-                ContentUnavailableView(
-                    "No Cards",
-                    systemImage: "doc.text.magnifyingglass",
-                    description: Text("This set doesn't have any cards yet")
-                )
-            } else {
-                List {
-                    ForEach(cards, id: \.id) { card in
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(card.term)
-                                .font(.custom("Kiwi Maru Regular", size: 18))
-                                .foregroundColor(.primary)
+        ZStack {
+            // Background color
+            Color.white.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Custom header
+                ZStack {
+                    Color(hex: "#C97D60").ignoresSafeArea(edges: .top)
+                    
+                    VStack {
+                        HStack {
+                            Button(action: { dismiss() }) {
+                                Image(systemName: "chevron.left")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 22))
+                            }
+                            .padding(.leading, 20)
                             
-                            Divider()
+                            Spacer()
                             
-                            Text(card.def)
-                                .font(.custom("Kiwi Maru Light", size: 16))
-                                .foregroundColor(.secondary)
+                            Text(setTitle)
+                                .font(.custom("Kiwi Maru Medium", size: 25))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                            
+                            Spacer()
+                            
+                            Color.clear
+                                .frame(width: 22, height: 22)
+                                .padding(.trailing, 20)
                         }
-                        .padding(.vertical, 8)
+                        .padding(.top, 25)
+                        .padding(.bottom, 15)
                     }
+                }
+                .frame(height: 75)
+                
+                // Content
+                if isLoading {
+                    loadingView
+                } else if cards.isEmpty {
+                    emptyCardsView
+                } else {
+                    cardsListView
                 }
             }
         }
-        .navigationTitle(setTitle)
         .onAppear {
             loadCards()
+        }
+        .navigationBarBackButtonHidden(true)
+    }
+    
+    // MARK: - Component Views
+    
+    private var loadingView: some View {
+        VStack {
+            Spacer()
+            ProgressView()
+                .scaleEffect(1.5)
+                .padding()
+            Text("Loading cards...")
+                .font(.custom("Kiwi Maru Light", size: 16))
+                .foregroundColor(.gray)
+                .padding()
+            Spacer()
+        }
+    }
+    
+    private var emptyCardsView: some View {
+        VStack(spacing: 25) {
+            Spacer()
+            
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.system(size: 70))
+                .foregroundColor(Color(hex: "#C97D60").opacity(0.7))
+            
+            Text("No Cards")
+                .font(.custom("Kiwi Maru Regular", size: 24))
+                .foregroundColor(Color.gray)
+            
+            Text("This set doesn't have any cards yet")
+                .font(.custom("Kiwi Maru Light", size: 18))
+                .foregroundColor(Color.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            Spacer()
+        }
+        .padding()
+    }
+    
+    private var cardsListView: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                ForEach(cards, id: \.id) { card in
+                    CardView(card: card)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 20)
+            .padding(.bottom, 100)
         }
     }
     
@@ -137,6 +326,69 @@ struct SetDetailView: View {
             self.cards = fetchedCards
             self.isLoading = false
         }
+    }
+}
+
+// Custom Card View component
+struct CardView: View {
+    let card: Card
+    @State private var flipped = false
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
+            
+            VStack(alignment: .leading, spacing: 15) {
+                if flipped {
+                    // Definition side
+                    Text("Definition")
+                        .font(.custom("Kiwi Maru Regular", size: 14))
+                        .foregroundColor(Color(hex: "#C97D60"))
+                        .padding(.bottom, 5)
+                    
+                    Text(card.def)
+                        .font(.custom("Kiwi Maru Regular", size: 18))
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.leading)
+                } else {
+                    // Term side
+                    Text("Term")
+                        .font(.custom("Kiwi Maru Regular", size: 14))
+                        .foregroundColor(Color(hex: "#C97D60"))
+                        .padding(.bottom, 5)
+                    
+                    Text(card.term)
+                        .font(.custom("Kiwi Maru Regular", size: 18))
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.leading)
+                }
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    
+                    Button(action: {
+                        withAnimation(.spring()) {
+                            flipped.toggle()
+                        }
+                    }) {
+                        Text(flipped ? "Show Term" : "Show Definition")
+                            .font(.custom("Kiwi Maru Light", size: 14))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 15)
+                            .padding(.vertical, 8)
+                            .background(Color(hex: "#C97D60"))
+                            .cornerRadius(15)
+                    }
+                }
+            }
+            .padding(20)
+        }
+        .frame(height: 180)
+        .padding(.vertical, 5)
     }
 }
 
