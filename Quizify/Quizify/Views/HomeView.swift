@@ -59,24 +59,51 @@ struct HomeView: View {
             
             VStack(alignment: .leading, spacing: 20) {
                 NavigationLink(destination: Text("Profile View")) {
-                    SideMenuItem(title: "Profile", icon: "person.fill") {}
+                    HStack(spacing: 15) {
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("Profile")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
                 }
                 
-                NavigationLink(destination: Text("My Sets View")) {
-                    SideMenuItem(title: "My Sets", icon: "folder.fill") {}
+                NavigationLink(destination: SetsListView()) {
+                    HStack(spacing: 15) {
+                        Image(systemName: "folder.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("My Sets")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
                 }
                 
                 NavigationLink(destination: Text("Settings View")) {
-                    SideMenuItem(title: "Settings", icon: "gear") {}
+                    HStack(spacing: 15) {
+                        Image(systemName: "gear")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("Settings")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
                 }
                 
                 NavigationLink(destination: Text("Help View")) {
-                    SideMenuItem(title: "Help", icon: "questionmark.circle.fill") {}
+                    HStack(spacing: 15) {
+                        Image(systemName: "questionmark.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("Help")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
                 }
             }
             .padding(.top, 40)
             .padding(.horizontal)
-            
             Spacer()
             
             Divider()
@@ -131,8 +158,8 @@ struct HomeView: View {
                                         Text("Item \($0)")
                                             .foregroundStyle(.white)
                                             .font(.largeTitle)
-                                            .frame(width: 190, height: 145)
-                                            .background(Color(hex: "#C97D60"))
+                                            .frame(width: 160, height: 145)
+                                            .background(Color(hex: "#edae95"))
                                             .cornerRadius(15)
                                     }
                                 }
@@ -147,6 +174,13 @@ struct HomeView: View {
                                     .font(.custom("Kiwi Maru Light", size: 25))
                                     .foregroundColor(Color(.gray))
                                     .padding(.leading, 30)
+                                
+//                                Rectangle()
+//                                    .frame(width: 200, height: 200)
+//                                    .foregroundColor(Color(hex: "#edae95"))
+//                                    .cornerRadius(20)
+                                
+                                
                             }
                         }
                     }
@@ -207,7 +241,7 @@ struct HomeView: View {
                             }
                                 .cornerRadius(30)
                         )
-                        .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 5)
+                        .shadow(color: Color.black.opacity(0.2), radius: 15, x: 0, y: 5)
                         .padding(.horizontal)
                     }
                     .frame(height: 100)
