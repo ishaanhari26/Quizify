@@ -21,6 +21,7 @@ struct QuizifyApp: App {
     var body: some Scene {
         WindowGroup {
             GreetingView()
+                .environmentObject(dataManager)
         }
     }
 }

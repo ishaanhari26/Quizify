@@ -9,6 +9,7 @@ import SwiftUI
 
 struct NewSetView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
         NavigationView {
@@ -25,7 +26,7 @@ struct NewSetView: View {
                     }
                     VStack(spacing: 50){
                         Button(action: {
-                            
+                            // Scan functionality will be implemented later
                         }){
                             Text("Scan")
                                 .foregroundStyle(.white)
@@ -36,7 +37,7 @@ struct NewSetView: View {
                         }
                         
                         Button(action: {
-                            
+                            // Generate functionality will be implemented later
                         }){
                             Text("Generate")
                                 .foregroundStyle(.white)
@@ -47,7 +48,7 @@ struct NewSetView: View {
                         }
                         
                         Button(action: {
-                            
+                            // Upload file functionality will be implemented later
                         }){
                             Text("Upload file")
                                 .foregroundStyle(.white)
@@ -57,9 +58,7 @@ struct NewSetView: View {
                                 .cornerRadius(15)
                         }
                         
-                        Button(action: {
-                            
-                        }){
+                        NavigationLink(destination: ManualCreateView().environmentObject(dataManager)) {
                             Text("Create manually")
                                 .foregroundStyle(.white)
                                 .font(.custom("Kiwi Maru Light", size: 22))
@@ -92,4 +91,5 @@ struct NewSetView: View {
 
 #Preview {
     NewSetView()
+        .environmentObject(DataManager())
 }
