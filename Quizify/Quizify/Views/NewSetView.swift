@@ -36,9 +36,7 @@ struct NewSetView: View {
                                 .cornerRadius(15)
                         }
                         
-                        Button(action: {
-                            // Generate functionality will be implemented later
-                        }){
+                        NavigationLink(destination: GenerateSetView().environmentObject(dataManager)) {
                             Text("Generate")
                                 .foregroundStyle(.white)
                                 .font(.custom("Kiwi Maru Light", size: 22))
@@ -87,6 +85,11 @@ struct NewSetView: View {
         }
         .navigationBarBackButtonHidden(true)
     }
+}
+
+#Preview {
+    NewSetView()
+        .environmentObject(DataManager())
 }
 
 #Preview {

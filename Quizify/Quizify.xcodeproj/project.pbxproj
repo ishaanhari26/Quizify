@@ -15,6 +15,10 @@
 		CB00ECEC2D8B78DA001182C0 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = CB00ECEB2D8B78DA001182C0 /* FirebaseCore */; };
 		CB00ECEE2D8B78DA001182C0 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CB00ECED2D8B78DA001182C0 /* FirebaseFirestore */; };
 		CB00ECF42D8C58C7001182C0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00ECF32D8C58C7001182C0 /* ProfileView.swift */; };
+		CB00ED052D8F3E14001182C0 /* GoogleGenerativeAI in Frameworks */ = {isa = PBXBuildFile; productRef = CB00ED042D8F3E14001182C0 /* GoogleGenerativeAI */; };
+		CB00ED072D8F3E29001182C0 /* GeminiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00ED062D8F3E29001182C0 /* GeminiService.swift */; };
+		CB00ED092D8F3E47001182C0 /* GenerateSetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00ED082D8F3E47001182C0 /* GenerateSetViewModel.swift */; };
+		CB00ED0B2D8F3E65001182C0 /* GenerateSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */; };
 		CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB04898A2CEA68780037BA6F /* NewSetView.swift */; };
 		CB6602952CE66DCA004BD579 /* KiwiMaru-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25B2CE42A2F001F8ED0 /* KiwiMaru-Light.ttf */; };
 		CB6602962CE66DCA004BD579 /* KiwiMaru-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */; };
@@ -58,6 +62,9 @@
 
 /* Begin PBXFileReference section */
 		CB00ECF32D8C58C7001182C0 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		CB00ED062D8F3E29001182C0 /* GeminiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiService.swift; sourceTree = "<group>"; };
+		CB00ED082D8F3E47001182C0 /* GenerateSetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateSetViewModel.swift; sourceTree = "<group>"; };
+		CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateSetView.swift; sourceTree = "<group>"; };
 		CB04898A2CEA68780037BA6F /* NewSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSetView.swift; sourceTree = "<group>"; };
 		CB6602982CE67605004BD579 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		CB66029A2CE6BF65004BD579 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -94,6 +101,7 @@
 				CB8E36C82D5E7A0500A96E3A /* FirebaseAnalytics in Frameworks */,
 				CB82DE602D89E8FC00E73551 /* FirebaseFirestore in Frameworks */,
 				CBDD1F222D6665C0004EC398 /* FirebaseAuth in Frameworks */,
+				CB00ED052D8F3E14001182C0 /* GoogleGenerativeAI in Frameworks */,
 				CB00ECEA2D8B729F001182C0 /* FirebaseFirestoreCombine-Community in Frameworks */,
 				CB00ECE22D8B5FC9001182C0 /* FirebaseFirestore in Frameworks */,
 				CB00ECE62D8B7282001182C0 /* FirebaseCore in Frameworks */,
@@ -162,6 +170,8 @@
 				CBECC2532CE4275A001F8ED0 /* Views */,
 				CB8332822D6913EE00ACDC99 /* AuthManager.swift */,
 				CB82DE5D2D89E57300E73551 /* DataManager.swift */,
+				CB00ED062D8F3E29001182C0 /* GeminiService.swift */,
+				CB00ED082D8F3E47001182C0 /* GenerateSetViewModel.swift */,
 				CBECC22D2CE42706001F8ED0 /* Assets.xcassets */,
 				CBECC22F2CE42706001F8ED0 /* Preview Content */,
 			);
@@ -204,6 +214,7 @@
 				CB82DE612D89E9FF00E73551 /* SetsListView.swift */,
 				CB1D3D202D766E3B00474C31 /* DeckCreateViews */,
 				CB04898A2CEA68780037BA6F /* NewSetView.swift */,
+				CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -301,6 +312,7 @@
 			mainGroup = CBECC21D2CE42702001F8ED0;
 			packageReferences = (
 				CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				CB00ED032D8F3E14001182C0 /* XCRemoteSwiftPackageReference "generative-ai-swift" */,
 			);
 			productRefGroup = CBECC2272CE42702001F8ED0 /* Products */;
 			projectDirPath = "";
@@ -352,7 +364,10 @@
 				CB82DE5E2D89E57300E73551 /* DataManager.swift in Sources */,
 				CB8332832D6913EE00ACDC99 /* AuthManager.swift in Sources */,
 				CBECC2572CE4277A001F8ED0 /* LoginView.swift in Sources */,
+				CB00ED072D8F3E29001182C0 /* GeminiService.swift in Sources */,
 				CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */,
+				CB00ED0B2D8F3E65001182C0 /* GenerateSetView.swift in Sources */,
+				CB00ED092D8F3E47001182C0 /* GenerateSetViewModel.swift in Sources */,
 				CB82DE622D89E9FF00E73551 /* SetsListView.swift in Sources */,
 				CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */,
 				CBECC22A2CE42702001F8ED0 /* QuizifyApp.swift in Sources */,
@@ -687,6 +702,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		CB00ED032D8F3E14001182C0 /* XCRemoteSwiftPackageReference "generative-ai-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/generative-ai-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.6;
+			};
+		};
 		CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -732,6 +755,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CB8E36C62D5E7A0500A96E3A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		CB00ED042D8F3E14001182C0 /* GoogleGenerativeAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB00ED032D8F3E14001182C0 /* XCRemoteSwiftPackageReference "generative-ai-swift" */;
+			productName = GoogleGenerativeAI;
 		};
 		CB82DE5F2D89E8FC00E73551 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
