@@ -10,6 +10,10 @@ import SwiftUI
 struct SetsListView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var showCreateSetSheet = false
+    @State private var isDeleting = false
+    @State private var showDeleteAlert = false
+    @State private var setToDelete: Set? = nil
+    @State private var showDeleteConfirmation = false
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -32,6 +36,33 @@ struct SetsListView: View {
         .sheet(isPresented: $showCreateSetSheet) {
             ManualCreateView()
                 .environmentObject(dataManager)
+        }
+        .alert("Delete Set", isPresented: $showDeleteConfirmation, presenting: setToDelete) { set in
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                deleteSet(set)
+            }
+        } message: { set in
+            Text("Are you sure you want to delete \"\(set.title)\"? This action cannot be undone.")
+        }
+        .overlay {
+            if isDeleting {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                VStack {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                        .padding()
+                    Text("Deleting...")
+                        .font(.custom("Kiwi Maru Light", size: 14))
+                        .foregroundColor(.white)
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.gray.opacity(0.7))
+                )
+            }
         }
         .onAppear {
             dataManager.fetchSets()
@@ -118,10 +149,34 @@ struct SetsListView: View {
         ScrollView {
             VStack(spacing: 16) {
                 ForEach(dataManager.sets) { set in
-                    NavigationLink(destination: SetDetailView(setID: set.id, setTitle: set.title)) {
-                        SetCardView(set: set)
+                    ZStack {
+                        // Link to detail view
+                        NavigationLink(destination: SetDetailView(setID: set.id, setTitle: set.title)) {
+                            SetCardView(set: set)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        // Delete button overlay at the trailing edge
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                setToDelete = set
+                                showDeleteConfirmation = true
+                            }) {
+                                Image(systemName: "trash.circle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 24))
+                                    .padding(8)
+                                    .background(
+                                        Circle()
+                                            .fill(Color.white)
+                                    )
+                                    .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+                            }
+                            .offset(x: 8, y: 0)
+                        }
+                        .padding(.trailing, 5)
                     }
-                    .buttonStyle(PlainButtonStyle())
                 }
             }
             .padding(.horizontal)
@@ -130,10 +185,18 @@ struct SetsListView: View {
         }
     }
     
-    func deleteSet(at offsets: IndexSet) {
-        // Here you would add the code to delete the set from Firebase
-        // For now, we'll just remove it from the local array
-        // dataManager.deleteSet(at: offsets)
+    // Function to delete a set
+    private func deleteSet(_ set: Set) {
+        isDeleting = true
+        dataManager.deleteSet(setID: set.id) { success in
+            isDeleting = false
+            if success {
+                // The set has already been removed from the array in the dataManager
+            } else {
+                // Handle error case
+                // You could show an alert here
+            }
+        }
     }
 }
 

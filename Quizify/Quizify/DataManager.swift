@@ -5,13 +5,6 @@
 //  Created by Rishi Suryavanshi on 3/18/25.
 //
 
-//
-//  DataManager.swift
-//  Quizify
-//
-//  Created by Rishi Suryavanshi on 3/18/25.
-//
-
 import Foundation
 import Firebase
 import FirebaseFirestore
@@ -175,13 +168,49 @@ class DataManager: ObservableObject {
         }
     }
     
-    // Legacy method - backward compatibility
-    func addCard(term: String, def: String = "") {
+    // Delete a set and all its cards from Firestore
+    func deleteSet(setID: String, completion: @escaping (Bool) -> Void = { _ in }) {
         let db = Firestore.firestore()
-        let ref = db.collection("Card").document(term)
-        ref.setData(["term": term, "def": def, "id": term]) { error in
+        let setRef = db.collection("Sets").document(setID)
+        
+        // First, get all cards in the set to delete them
+        let cardsRef = setRef.collection("Cards")
+        
+        // Get all documents in the Cards subcollection
+        cardsRef.getDocuments { (snapshot, error) in
             if let error = error {
-                print(error.localizedDescription)
+                print("Error getting card documents: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            // Use a batch to delete all cards and the set
+            let batch = db.batch()
+            
+            // Add card deletions to batch
+            if let snapshot = snapshot {
+                for document in snapshot.documents {
+                    batch.deleteDocument(document.reference)
+                }
+            }
+            
+            // Add set deletion to batch
+            batch.deleteDocument(setRef)
+            
+            // Commit the batch deletion
+            batch.commit { (error) in
+                if let error = error {
+                    print("Error deleting set and cards: \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                
+                // Remove the set from the local array
+                if let index = self.sets.firstIndex(where: { $0.id == setID }) {
+                    self.sets.remove(at: index)
+                }
+                
+                completion(true)
             }
         }
     }
