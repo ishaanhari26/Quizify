@@ -19,6 +19,8 @@ struct HomeView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @Binding var goToGreet: Bool
     @State private var navigateToGreet = false
+    @EnvironmentObject var dataManager: DataManager
+    @State private var isLoading = true
     
     // MARK: - Side Menu Item View
     private struct SideMenuItem: View {
@@ -144,45 +146,69 @@ struct HomeView: View {
                             Spacer()
                                 .frame(height: 100)
                             
-                            Text("Sets")
-                                .font(.custom("Kiwi Maru Light", size: 25))
-                                .foregroundColor(Color(.gray))
-                                .padding(.leading, 30)
-                                .padding(.bottom, 10)
-                            
-                            
-                            //Make half to show this is a scroll element
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 20) {
-                                    ForEach(0..<10) {
-                                        Text("Item \($0)")
-                                            .foregroundStyle(.white)
-                                            .font(.largeTitle)
-                                            .frame(width: 160, height: 145)
-                                            .background(Color(hex: "#edae95"))
-                                            .cornerRadius(15)
-                                    }
+                            HStack {
+                                Text("Sets")
+                                    .font(.custom("Kiwi Maru Light", size: 25))
+                                    .foregroundColor(Color(.gray))
+                                
+                                Spacer()
+                                
+                                NavigationLink(destination: SetsListView()) {
+                                    Text("See All")
+                                        .font(.custom("Kiwi Maru Light", size: 16))
+                                        .foregroundColor(Color(hex: "#C97D60"))
                                 }
-                                .padding(.horizontal, 5)
                             }
-                            .scrollIndicators(.hidden)
+                            .padding(.leading, 30)
+                            .padding(.trailing, 30)
+                            .padding(.bottom, 10)
+                            
+                            if isLoading {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                        .scaleEffect(1.2)
+                                        .padding()
+                                    Spacer()
+                                }
+                            } else if dataManager.sets.isEmpty {
+                                emptySetView
+                            } else {
+                                // Display sets in horizontal scroll
+                                ScrollView(.horizontal) {
+                                    HStack(spacing: 20) {
+                                        ForEach(dataManager.sets) { set in
+                                            NavigationLink(destination: SetDetailView(setID: set.id, setTitle: set.title)) {
+                                                SetTileView(set: set)
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 30)
+                                }
+                                .scrollIndicators(.hidden)
+                            }
                             
                             Spacer().frame(height: 30)
                             
-                            VStack() {
+                            VStack(alignment: .leading) {
                                 Text("Achievements")
                                     .font(.custom("Kiwi Maru Light", size: 25))
                                     .foregroundColor(Color(.gray))
                                     .padding(.leading, 30)
                                 
-//                                Rectangle()
-//                                    .frame(width: 200, height: 200)
-//                                    .foregroundColor(Color(hex: "#edae95"))
-//                                    .cornerRadius(20)
-                                
-                                
+                                // Placeholder for achievements section
+                                HStack {
+                                    Spacer()
+                                    Text("Coming soon!")
+                                        .font(.custom("Kiwi Maru Light", size: 18))
+                                        .foregroundColor(Color(.gray))
+                                        .padding()
+                                    Spacer()
+                                }
+                                .frame(height: 150)
                             }
                         }
+                        .padding(.bottom, 50)
                     }
                     
                     // Floating header with GeometryReader
@@ -250,6 +276,14 @@ struct HomeView: View {
                     GreetingView()
                         .navigationBarBackButtonHidden(true)
                 }
+                .onAppear {
+                    isLoading = true
+                    dataManager.fetchSets()
+                    // Add a small delay to show loading indicator
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        isLoading = false
+                    }
+                }
             }
             .offset(x: showMenu ? 270 : 0)
         }
@@ -257,8 +291,76 @@ struct HomeView: View {
         .ignoresSafeArea()
         .preferredColorScheme(.light)
     }
+    
+    // Empty state view when no sets are available
+    private var emptySetView: some View {
+        HStack {
+            Spacer()
+            VStack(spacing: 15) {
+                Image(systemName: "square.stack.3d.up.slash")
+                    .font(.system(size: 40))
+                    .foregroundColor(Color(hex: "#C97D60").opacity(0.7))
+                
+                Text("No sets yet")
+                    .font(.custom("Kiwi Maru Regular", size: 18))
+                    .foregroundColor(Color.gray)
+                
+                NavigationLink(destination: NewSetView()) {
+                    Text("Create your first set")
+                        .font(.custom("Kiwi Maru Regular", size: 16))
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color(hex: "#C97D60"))
+                        .foregroundColor(.white)
+                        .cornerRadius(15)
+                }
+            }
+            .padding(.vertical, 30)
+            Spacer()
+        }
+        .frame(height: 170)
+    }
+}
+
+// Custom Set Tile View for the horizontal scroll
+struct SetTileView: View {
+    let set: Set
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Card count indicator
+            HStack {
+                Text("\(set.cardCount)")
+                    .font(.custom("Kiwi Maru Medium", size: 18))
+                    .foregroundColor(.white)
+                
+                Text("cards")
+                    .font(.custom("Kiwi Maru Light", size: 12))
+                    .foregroundColor(.white)
+                
+                Spacer()
+            }
+            .padding(.horizontal, 10)
+            .padding(.top, 10)
+            
+            Spacer()
+            
+            // Set title
+            Text(set.title)
+                .font(.custom("Kiwi Maru Regular", size: 16))
+                .foregroundColor(.white)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
+        }
+        .frame(width: 160, height: 145)
+        .background(Color(hex: "#C97D60"))
+        .cornerRadius(15)
+    }
 }
 
 #Preview {
     HomeView(goToGreet: .constant(false))
+        .environmentObject(DataManager())
 }
