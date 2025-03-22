@@ -10,7 +10,7 @@ actor GeminiService {
     }
     
     private func setupGemini() {
-        // Set up configuration
+        // Config
         let config = GenerationConfig(
             temperature: 0.7,
             topP: 0.95,
@@ -19,10 +19,10 @@ actor GeminiService {
             responseMIMEType: "text/plain"
         )
         
-        // Hardcoded API key - replace with your actual Gemini API key
+        // Hardcoded api key
         let apiKey = "AIzaSyA9PlU3V3tJ3ljhsa-oM4qn9cn2WFvodRc"
         
-        // Initialize the model
+        // init model
         model = GenerativeModel(
             name: "gemini-2.0-flash",
             apiKey: apiKey,
@@ -36,16 +36,16 @@ actor GeminiService {
     ///   - cardCount: The desired number of flashcards
     /// - Returns: An array of FlashCard objects
     func generateFlashcards(from prompt: String, cardCount: Int = 10) async throws -> [FlashCard] {
-        // If model is nil, use fallback mock data
+        // If model is nil, use mock data
         guard let model = model else {
             return generateMockFlashcards(for: prompt, count: cardCount)
         }
         
         do {
-            // Create a chat instance
+            // create a chat instance
             let chat = model.startChat()
             
-            // Build the prompt for the AI
+            //Prompt fed to Gemini
             let systemPrompt = """
             Generate \(cardCount) flashcards for studying the topic: "\(prompt)".
             
@@ -53,7 +53,7 @@ actor GeminiService {
             
             Each flashcard should have:
             1. A clear, concise term (1-5 words if possible)
-            2. A comprehensive but concise definition (1-3 sentences)
+            2. A comprehensive but concise definition, that is brief
             
             Example format:
             [
@@ -70,10 +70,10 @@ actor GeminiService {
             Focus on essential concepts that would be most beneficial for studying this topic.
             """
             
-            // Send the prompt to the model
+            // Sends prompt to gemini
             let response = try await chat.sendMessage(systemPrompt)
             
-            // Parse the JSON response
+            // parse JSON
             guard let responseText = response.text else {
                 return generateMockFlashcards(for: prompt, count: cardCount)
             }
@@ -81,7 +81,7 @@ actor GeminiService {
             // Clean the response text to ensure it's valid JSON
             let cleanedResponse = cleanResponseText(responseText)
             
-            // Convert the response into flashcards
+            // convert into flashcards
             do {
                 return try parseFlashcardsFromJSON(cleanedResponse)
             } catch {
@@ -94,7 +94,7 @@ actor GeminiService {
         }
     }
     
-    /// Clean the response text to extract valid JSON
+    // Clean the response text to extract valid JSON
     private func cleanResponseText(_ text: String) -> String {
         // Find any JSON array in the response
         if let startIndex = text.firstIndex(of: "["),
@@ -105,7 +105,7 @@ actor GeminiService {
         return text
     }
     
-    /// Parse JSON response into flashcards
+    //Parse JSON response into flashcards
     private func parseFlashcardsFromJSON(_ jsonString: String) throws -> [FlashCard] {
         guard let jsonData = jsonString.data(using: .utf8) else {
             throw NSError(domain: "GeminiService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to convert response to data"])

@@ -11,6 +11,13 @@
 //
 //  Created by Rishi Suryavanshi
 
+//
+//  GenerateSetView.swift
+//  Quizify
+//
+//  Created by Rishi Suryavanshi on 3/22/25.
+//
+
 import SwiftUI
 
 struct GenerateSetView: View {
@@ -18,6 +25,12 @@ struct GenerateSetView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = GenerateSetViewModel()
     @State private var showConfirmation = false
+    
+    // Predefined subjects to help users with prompts
+    let subjectSuggestions = [
+        "World History", "Biology", "Physics", "Computer Science",
+        "Mathematics", "Literature", "Chemistry", "Psychology"
+    ]
     
     var body: some View {
         ZStack {
@@ -28,24 +41,40 @@ struct GenerateSetView: View {
                 headerView
                 
                 // Content
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Prompt input section
-                        if viewModel.generatedCards.isEmpty {
+                if viewModel.generatedCards.isEmpty {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Set details section
+                            setDetailsSection
+                            
+                            // Prompt input section
                             promptInputSection
-                        } else {
-                            // Set details section (when cards have been generated)
+                            
+                            // Topic suggestions
+                            topicSuggestionsSection
+                            
+                            // Generate button
+                            generateButton
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 40)
+                    }
+                } else {
+                    // Review generated cards view
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 10) {
+                            // Set details
                             setDetailsSection
                             
                             // Generated cards list
                             generatedCardsSection
                         }
+                        .padding(.bottom, 100)
                     }
-                    .padding(.bottom, 100)
+                    
+                    // Bottom buttons
+                    bottomButtonsView
                 }
-                
-                // Bottom buttons
-                bottomButtonsView
             }
             
             // Loading overlay
@@ -106,46 +135,6 @@ struct GenerateSetView: View {
         .frame(height: 75)
     }
     
-    private var promptInputSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("What would you like to learn?")
-                .font(.custom("Kiwi Maru Regular", size: 20))
-                .foregroundColor(.black)
-                .padding(.top, 20)
-                .padding(.horizontal)
-            
-            Text("Enter a topic, subject, or specific question")
-                .font(.custom("Kiwi Maru Light", size: 16))
-                .foregroundColor(.gray)
-                .padding(.horizontal)
-            
-            // Prompt text field
-            TextField("e.g., 'Spanish vocabulary for beginners' or 'Photosynthesis'", text: $viewModel.prompt)
-                .font(.custom("Kiwi Maru Regular", size: 16))
-                .padding()
-                .frame(minHeight: 100)
-                .background(Color(hex: "#CECECE").opacity(0.2))
-                .cornerRadius(15)
-                .multilineTextAlignment(.leading)
-                .padding(.horizontal)
-            
-            // Card count slider
-            VStack(alignment: .leading) {
-                Text("Number of flashcards: \(viewModel.cardCount)")
-                    .font(.custom("Kiwi Maru Regular", size: 16))
-                    .foregroundColor(.gray)
-                
-                Slider(value: Binding(
-                    get: { Double(viewModel.cardCount) },
-                    set: { viewModel.cardCount = Int($0) }
-                ), in: 5...20, step: 1)
-                .accentColor(Color(hex: "#C97D60"))
-            }
-            .padding(.horizontal)
-            .padding(.top, 10)
-        }
-    }
-    
     private var setDetailsSection: some View {
         VStack(alignment: .leading, spacing: 15) {
             // Title field
@@ -162,7 +151,6 @@ struct GenerateSetView: View {
                     .background(Color(hex: "#CECECE").opacity(0.2))
                     .cornerRadius(20)
             }
-            .padding(.horizontal)
             .padding(.top, 20)
             
             // Description section
@@ -184,7 +172,6 @@ struct GenerateSetView: View {
                         .background(Color(hex: "#CECECE").opacity(0.1))
                         .cornerRadius(15)
                     }
-                    .padding(.horizontal)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     VStack(alignment: .leading) {
@@ -214,10 +201,106 @@ struct GenerateSetView: View {
                             .background(Color(hex: "#CECECE").opacity(0.2))
                             .cornerRadius(20)
                     }
-                    .padding(.horizontal)
                 }
             }
         }
+    }
+    
+    private var promptInputSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            // Card count slider
+            VStack(alignment: .leading) {
+                Text("Number of Cards: \(viewModel.cardCount)")
+                    .font(.custom("Kiwi Maru Regular", size: 16))
+                    .foregroundColor(.black)
+                    .padding(.leading, 10)
+                
+                Slider(value: Binding(
+                    get: { Double(viewModel.cardCount) },
+                    set: { viewModel.cardCount = Int($0) }
+                ), in: 5...20, step: 1)
+                .accentColor(Color(hex: "#C97D60"))
+                .padding(.horizontal, 10)
+            }
+            
+            // What would you like to learn
+            Text("What would you like to learn?")
+                .font(.custom("Kiwi Maru Regular", size: 20))
+                .foregroundColor(.black)
+                .padding(.top, 10)
+            
+            Text("Enter a topic, subject, or specific question")
+                .font(.custom("Kiwi Maru Light", size: 16))
+                .foregroundColor(.gray)
+            
+            // Prompt text field
+            TextEditor(text: $viewModel.prompt)
+                .font(.custom("Kiwi Maru Regular", size: 16))
+                .padding()
+                .frame(minHeight: 120)
+                .background(Color(hex: "#CECECE").opacity(0.2))
+                .cornerRadius(15)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 15)
+                        .stroke(Color(hex: "#C97D60"), lineWidth: 1)
+                )
+            
+            // Helper text
+            Text("Example: \"Generate flashcards about the solar system\" or \"Create cards for basic Spanish vocabulary\"")
+                .font(.custom("Kiwi Maru Light", size: 14))
+                .foregroundColor(.gray)
+                .padding(.horizontal, 10)
+        }
+    }
+    
+    private var topicSuggestionsSection: some View {
+        VStack(alignment: .leading) {
+            Text("Suggested Topics:")
+                .font(.custom("Kiwi Maru Regular", size: 16))
+                .foregroundColor(.black)
+                .padding(.leading, 10)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(subjectSuggestions, id: \.self) { subject in
+                        Button(action: {
+                            if viewModel.prompt.isEmpty {
+                                viewModel.prompt = "Generate flashcards about \(subject)"
+                            } else {
+                                viewModel.prompt += " related to \(subject)"
+                            }
+                        }) {
+                            Text(subject)
+                                .font(.custom("Kiwi Maru Light", size: 14))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color(hex: "#C97D60").opacity(0.2))
+                                .foregroundColor(Color(hex: "#C97D60"))
+                                .cornerRadius(15)
+                        }
+                    }
+                }
+                .padding(.horizontal, 10)
+            }
+        }
+    }
+    
+    private var generateButton: some View {
+        Button(action: {
+            Task {
+                await viewModel.generateFlashcards()
+            }
+        }) {
+            Text("Generate Flashcards")
+                .font(.custom("Kiwi Maru Regular", size: 18))
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(viewModel.prompt.isEmpty || viewModel.isGenerating ? Color(hex: "#C97D60").opacity(0.5) : Color(hex: "#C97D60"))
+                .cornerRadius(20)
+                .foregroundColor(.white)
+        }
+        .disabled(viewModel.prompt.isEmpty || viewModel.isGenerating)
+        .padding(.vertical, 20)
     }
     
     private var generatedCardsSection: some View {
@@ -228,70 +311,53 @@ struct GenerateSetView: View {
                 .padding(.leading, 20)
                 .padding(.top, 10)
             
-            ForEach(Array(viewModel.generatedCards.enumerated()), id: \.element.id) { index, card in
-                GeneratedCardView(
-                    index: index,
-                    term: Binding(
-                        get: { viewModel.generatedCards[index].term },
-                        set: { viewModel.generatedCards[index].term = $0 }
-                    ),
-                    definition: Binding(
-                        get: { viewModel.generatedCards[index].definition },
-                        set: { viewModel.generatedCards[index].definition = $0 }
+            // Use ForEach with the cards' id property to avoid index issues
+            ForEach(viewModel.generatedCards) { card in
+                let index = viewModel.generatedCards.firstIndex(where: { $0.id == card.id }) ?? 0
+                
+                if index < viewModel.generatedCards.count {
+                    GeneratedCardView(
+                        index: index,
+                        term: Binding(
+                            get: { viewModel.generatedCards[index].term },
+                            set: { viewModel.generatedCards[index].term = $0 }
+                        ),
+                        definition: Binding(
+                            get: { viewModel.generatedCards[index].definition },
+                            set: { viewModel.generatedCards[index].definition = $0 }
+                        )
                     )
-                )
+                }
             }
         }
         .padding(.horizontal)
     }
     
     private var bottomButtonsView: some View {
-        Group {
-            if viewModel.generatedCards.isEmpty {
-                // Generate button
-                Button(action: {
-                    Task {
-                        await viewModel.generateFlashcards()
-                    }
-                }) {
-                    Text("Generate Flashcards")
-                        .font(.custom("Kiwi Maru Regular", size: 18))
-                        .frame(width: 250, height: 50)
-                        .background(Color(hex: "#C97D60"))
-                        .cornerRadius(20)
-                        .foregroundColor(.white)
-                }
-                .padding(.vertical, 20)
-                .disabled(viewModel.prompt.isEmpty || viewModel.isGenerating)
-                .opacity(viewModel.prompt.isEmpty || viewModel.isGenerating ? 0.5 : 1.0)
-            } else {
-                // Save and regenerate buttons
-                HStack(spacing: 20) {
-                    Button(action: {
-                        viewModel.generatedCards = []
-                    }) {
-                        Text("Regenerate")
-                            .font(.custom("Kiwi Maru Regular", size: 18))
-                            .frame(width: 170, height: 43)
-                            .background(Color(hex: "#C97D60").opacity(0.7))
-                            .cornerRadius(20)
-                            .foregroundColor(.white)
-                    }
-                    
-                    Button(action: {
-                        showConfirmation = true
-                    }) {
-                        Text("Save Set")
-                            .font(.custom("Kiwi Maru Regular", size: 18))
-                            .frame(width: 170, height: 43)
-                            .background(Color(hex: "#C97D60"))
-                            .cornerRadius(20)
-                            .foregroundColor(.white)
-                    }
-                }
-                .padding(.vertical, 20)
+        HStack(spacing: 20) {
+            Button(action: {
+                viewModel.generatedCards = []
+            }) {
+                Text("Regenerate")
+                    .font(.custom("Kiwi Maru Regular", size: 18))
+                    .frame(width: 170, height: 43)
+                    .background(Color(hex: "#C97D60").opacity(0.7))
+                    .cornerRadius(20)
+                    .foregroundColor(.white)
+            }
+            
+            Button(action: {
+                showConfirmation = true
+            }) {
+                Text("Save Set")
+                    .font(.custom("Kiwi Maru Regular", size: 18))
+                    .frame(width: 170, height: 43)
+                    .background(Color(hex: "#C97D60"))
+                    .cornerRadius(20)
+                    .foregroundColor(.white)
             }
         }
+        .padding(.vertical, 20)
     }
     
     private var loadingOverlay: some View {
@@ -301,21 +367,21 @@ struct GenerateSetView: View {
             VStack {
                 ProgressView()
                     .scaleEffect(1.5)
-                    .padding()
+                    .tint(.white)
+                
                 Text("Generating flashcards...")
                     .font(.custom("Kiwi Maru Light", size: 16))
                     .foregroundColor(.white)
+                    .padding(.top, 10)
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.gray.opacity(0.7))
-            )
+            .padding(30)
+            .background(Color(hex: "#C97D60").opacity(0.8))
+            .cornerRadius(15)
         }
     }
 }
 
-// View for displaying and editing generated cards
+// Generated Card View for reviewing generated cards
 struct GeneratedCardView: View {
     let index: Int
     @Binding var term: String
@@ -400,8 +466,4 @@ struct GeneratedCardView: View {
 #Preview {
     GenerateSetView()
         .environmentObject(DataManager())
-}
-
-#Preview {
-    GenerateSetView()
 }

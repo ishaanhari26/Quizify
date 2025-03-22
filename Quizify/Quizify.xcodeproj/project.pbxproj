@@ -170,7 +170,6 @@
 				CBECC2532CE4275A001F8ED0 /* Views */,
 				CB8332822D6913EE00ACDC99 /* AuthManager.swift */,
 				CB82DE5D2D89E57300E73551 /* DataManager.swift */,
-				CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */,
 				CB00ED062D8F3E29001182C0 /* GeminiService.swift */,
 				CB00ED082D8F3E47001182C0 /* GenerateSetViewModel.swift */,
 				CBECC22D2CE42706001F8ED0 /* Assets.xcassets */,
@@ -215,6 +214,7 @@
 				CB82DE612D89E9FF00E73551 /* SetsListView.swift */,
 				CB1D3D202D766E3B00474C31 /* DeckCreateViews */,
 				CB04898A2CEA68780037BA6F /* NewSetView.swift */,
+				CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
