@@ -9,6 +9,14 @@ import SwiftUI
 import FirebaseCore
 import FirebaseAuth
 
+import GoogleSignIn
+import GoogleSignInSwift
+
+
+struct GoogleSignInResultModel {
+    let idToken: String
+    let accessToken: String
+}
 
 @MainActor
 final class LoginEmailViewModel : ObservableObject {
@@ -39,17 +47,25 @@ final class LoginEmailViewModel : ObservableObject {
             print("Error: \(error)")
         }
     }
-}
-
-
-struct CircularImageModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .clipShape(Circle())
-            .contentShape(Circle())
+    
+    func googleAuth() async throws {
+        guard let topVC = Utilities.shared.topViewController() else {
+            throw URLError(.cannotFindHost)
+        }
+        
+        let gidResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: topVC)
+        
+        guard let idToken = gidResult.user.idToken?.tokenString else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let accessToken = gidResult.user.accessToken.tokenString
+        
+        let tokens = GoogleSignInResultModel(idToken: idToken, accessToken: accessToken)
+        
+        try await AuthManager.shared.signInWithGoogle(tokens: tokens)
     }
 }
-
 
 struct LoginView: View {
     
@@ -156,12 +172,23 @@ struct LoginView: View {
                         .foregroundColor(.black)
                 }
                 
-                Image(.googleSymbol)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 50, height: 50)
-                    .background(Color(hex: "#D9D9D9"))
-                    .modifier(CircularImageModifier())
+                Button(action: {
+                    Task {
+                        do {
+                            try await viewModel.googleAuth()
+                        } catch {
+                            print(error)
+                        }
+                    }
+                }) {
+                    Image(.googleSymbol)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 50, height: 50)
+                        .background(Color(hex: "#D9D9D9"))
+                        .modifier(CircularImageModifier())
+                }
+                    
                 
                 if !viewModel.errorMessage.isEmpty {
                     Text(viewModel.errorMessage)
