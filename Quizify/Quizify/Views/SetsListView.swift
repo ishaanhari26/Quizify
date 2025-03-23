@@ -272,6 +272,8 @@ struct SetDetailView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var cards: [Card] = []
     @State private var isLoading = true
+    @State private var currentCardIndex = 0
+    @State private var flipped = false
     @Environment(\.dismiss) var dismiss
     
     let setID: String
@@ -284,36 +286,7 @@ struct SetDetailView: View {
             
             VStack(spacing: 0) {
                 // Custom header
-                ZStack {
-                    Color(hex: "#C97D60").ignoresSafeArea(edges: .top)
-                    
-                    VStack {
-                        HStack {
-                            Button(action: { dismiss() }) {
-                                Image(systemName: "chevron.left")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 22))
-                            }
-                            .padding(.leading, 20)
-                            
-                            Spacer()
-                            
-                            Text(setTitle)
-                                .font(.custom("Kiwi Maru Medium", size: 25))
-                                .foregroundColor(.white)
-                                .lineLimit(1)
-                            
-                            Spacer()
-                            
-                            Color.clear
-                                .frame(width: 22, height: 22)
-                                .padding(.trailing, 20)
-                        }
-                        .padding(.top, 25)
-                        .padding(.bottom, 15)
-                    }
-                }
-                .frame(height: 75)
+                headerView
                 
                 // Content
                 if isLoading {
@@ -321,7 +294,65 @@ struct SetDetailView: View {
                 } else if cards.isEmpty {
                     emptyCardsView
                 } else {
-                    cardsListView
+                    // Make the entire content area scrollable
+                    ScrollViewReader { scrollProxy in
+                        ScrollView {
+                            VStack(spacing: 20) {
+                                // Card counter
+                                Text("Card \(currentCardIndex + 1) of \(cards.count)")
+                                    .font(.custom("Kiwi Maru Light", size: 16))
+                                    .foregroundColor(Color(hex: "#C97D60"))
+                                    .padding(.top, 20)
+                                    .id("topCard") // ID for scrolling
+                                
+                                // Current flashcard
+                                flashcardView
+                                    .padding(.horizontal, 20)
+                                
+                                // Navigation controls
+                                navigationControls
+                                    .padding(.horizontal, 20)
+                                    .padding(.bottom, 20)
+                                
+                                // Divider
+                                Rectangle()
+                                    .fill(Color(hex: "#EEEEEE"))
+                                    .frame(height: 1)
+                                    .padding(.horizontal, 20)
+                                
+                                // All cards list header
+                                Text("All Cards")
+                                    .font(.custom("Kiwi Maru Regular", size: 20))
+                                    .foregroundColor(.gray)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, 10)
+                                
+                                // Cards list (now part of the main ScrollView)
+                                VStack(spacing: 15) {
+                                    ForEach(Array(cards.enumerated()), id: \.element.id) { index, card in
+                                        CompactCardView(
+                                            card: card,
+                                            isSelected: index == currentCardIndex,
+                                            onTap: {
+                                                withAnimation {
+                                                    currentCardIndex = index
+                                                    flipped = false
+                                                    
+                                                    // Scroll to the top card with animation
+                                                    withAnimation {
+                                                        scrollProxy.scrollTo("topCard", anchor: .top)
+                                                    }
+                                                }
+                                            }
+                                        )
+                                        .padding(.horizontal, 20)
+                                    }
+                                }
+                                .padding(.bottom, 80)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -332,6 +363,40 @@ struct SetDetailView: View {
     }
     
     // MARK: - Component Views
+    
+    private var headerView: some View {
+        ZStack {
+            Color(hex: "#C97D60").ignoresSafeArea(edges: .top)
+            
+            VStack {
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .font(.system(size: 22))
+                    }
+                    .padding(.leading, 20)
+                    
+                    Spacer()
+                    
+                    Text(setTitle)
+                        .font(.custom("Kiwi Maru Medium", size: 25))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    // Add a study progress button or icon here if needed
+                    Color.clear
+                        .frame(width: 22, height: 22)
+                        .padding(.trailing, 20)
+                }
+                .padding(.top, 25)
+                .padding(.bottom, 15)
+            }
+        }
+        .frame(height: 75)
+    }
     
     private var loadingView: some View {
         VStack {
@@ -370,18 +435,141 @@ struct SetDetailView: View {
         .padding()
     }
     
-    private var cardsListView: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                ForEach(cards, id: \.id) { card in
-                    CardView(card: card)
+    private var flashcardView: some View {
+        ZStack {
+            // Card
+            VStack {
+                ZStack {
+                    // Card background with shadow
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 3)
+                        .contentShape(Rectangle()) // Make the entire card tappable
+                    
+                    // Fixed position for Term/Definition label
+                    VStack {
+                        HStack {
+                            Text(flipped ? "Definition" : "Term")
+                                .font(.custom("Kiwi Maru Regular", size: 16))
+                                .foregroundColor(Color(hex: "#C97D60"))
+                                .padding(.top, 25)
+                                .padding(.leading, 25)
+                            Spacer()
+                        }
+                        Spacer()
+                    }
+                    .zIndex(2) // Ensure the label stays on top
+                    
+                    // Front of card (Term)
+                    if !flipped && cards.indices.contains(currentCardIndex) {
+                        VStack(alignment: .leading, spacing: 15) {
+                            // Empty space to account for the fixed label
+                            Text("")
+                                .font(.custom("Kiwi Maru Regular", size: 16))
+                                .padding(.bottom, 10)
+                            
+                            // Term content
+                            Text(cards[currentCardIndex].term)
+                                .font(.custom("Kiwi Maru Regular", size: 22))
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.top, 20) // Add some space below the fixed label
+                            
+                            Spacer()
+                        }
+                        .padding(25)
+                    }
+                    
+                    // Back of card (Definition) - Note the rotation to make text readable when flipped
+                    if flipped && cards.indices.contains(currentCardIndex) {
+                        VStack(alignment: .leading, spacing: 15) {
+                            // Empty space to account for the fixed label
+                            Text("")
+                                .font(.custom("Kiwi Maru Regular", size: 16))
+                                .padding(.bottom, 10)
+                            
+                            // Definition content
+                            Text(cards[currentCardIndex].def)
+                                .font(.custom("Kiwi Maru Regular", size: 22))
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.top, 20) // Add some space below the fixed label
+                            
+                            Spacer()
+                        }
+                        .padding(25)
+                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                    }
+                }
+                .rotation3DEffect(
+                    .degrees(flipped ? 180 : 0),
+                    axis: (x: 0.0, y: 1.0, z: 0.0)
+                )
+                .onTapGesture {
+                    withAnimation(.spring()) {
+                        flipped.toggle()
+                    }
                 }
             }
-            .padding(.horizontal)
-            .padding(.top, 20)
-            .padding(.bottom, 100)
+            .frame(height: 300)
         }
     }
+    
+    private var navigationControls: some View {
+        HStack(spacing: 30) {
+            // Previous button
+            Button(action: {
+                withAnimation {
+                    flipped = false
+                    currentCardIndex = max(0, currentCardIndex - 1)
+                }
+            }) {
+                Image(systemName: "arrow.left.circle.fill")
+                    .font(.system(size: 40))
+                    .foregroundColor(currentCardIndex > 0 ? Color(hex: "#C97D60") : Color.gray.opacity(0.5))
+            }
+            .disabled(currentCardIndex <= 0)
+            
+            Spacer()
+            
+            // Flip button (larger center button)
+            Button(action: {
+                withAnimation(.spring()) {
+                    flipped.toggle()
+                }
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "#C97D60"))
+                        .frame(width: 60, height: 60)
+                    
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                }
+            }
+            
+            Spacer()
+            
+            // Next button
+            Button(action: {
+                withAnimation {
+                    flipped = false
+                    currentCardIndex = min(cards.count - 1, currentCardIndex + 1)
+                }
+            }) {
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.system(size: 40))
+                    .foregroundColor(currentCardIndex < cards.count - 1 ? Color(hex: "#C97D60") : Color.gray.opacity(0.5))
+            }
+            .disabled(currentCardIndex >= cards.count - 1)
+        }
+        .padding(.vertical, 10)
+    }
+    
+    // Removed allCardsList since it's now integrated directly in the body
     
     private func loadCards() {
         isLoading = true
@@ -392,66 +580,45 @@ struct SetDetailView: View {
     }
 }
 
-// Custom Card View component
-struct CardView: View {
+// Compact card view for the list of all cards
+struct CompactCardView: View {
     let card: Card
-    @State private var flipped = false
+    let isSelected: Bool
+    let onTap: () -> Void
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
-            
-            VStack(alignment: .leading, spacing: 15) {
-                if flipped {
-                    // Definition side
-                    Text("Definition")
-                        .font(.custom("Kiwi Maru Regular", size: 14))
-                        .foregroundColor(Color(hex: "#C97D60"))
-                        .padding(.bottom, 5)
+        Button(action: onTap) {
+            HStack(spacing: 15) {
+                // Term preview
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(card.term)
+                        .font(.custom("Kiwi Maru Regular", size: 16))
+                        .foregroundColor(.black)
+                        .lineLimit(1)
                     
                     Text(card.def)
-                        .font(.custom("Kiwi Maru Regular", size: 18))
-                        .foregroundColor(.black)
-                        .multilineTextAlignment(.leading)
-                } else {
-                    // Term side
-                    Text("Term")
-                        .font(.custom("Kiwi Maru Regular", size: 14))
-                        .foregroundColor(Color(hex: "#C97D60"))
-                        .padding(.bottom, 5)
-                    
-                    Text(card.term)
-                        .font(.custom("Kiwi Maru Regular", size: 18))
-                        .foregroundColor(.black)
-                        .multilineTextAlignment(.leading)
+                        .font(.custom("Kiwi Maru Light", size: 14))
+                        .foregroundColor(.gray)
+                        .lineLimit(2)
                 }
                 
                 Spacer()
                 
-                HStack {
-                    Spacer()
-                    
-                    Button(action: {
-                        withAnimation(.spring()) {
-                            flipped.toggle()
-                        }
-                    }) {
-                        Text(flipped ? "Show Term" : "Show Definition")
-                            .font(.custom("Kiwi Maru Light", size: 14))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 15)
-                            .padding(.vertical, 8)
-                            .background(Color(hex: "#C97D60"))
-                            .cornerRadius(15)
-                    }
-                }
+                Image(systemName: "chevron.right")
+                    .foregroundColor(Color(hex: "#C97D60"))
+                    .font(.system(size: 14))
             }
-            .padding(20)
+            .padding(15)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color(hex: "#C97D60").opacity(0.1) : Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(isSelected ? Color(hex: "#C97D60") : Color.gray.opacity(0.2), lineWidth: isSelected ? 2 : 1)
+                    )
+            )
         }
-        .frame(height: 180)
-        .padding(.vertical, 5)
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
