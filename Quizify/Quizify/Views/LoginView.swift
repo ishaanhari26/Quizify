@@ -63,7 +63,15 @@ final class LoginEmailViewModel : ObservableObject {
         
         let tokens = GoogleSignInResultModel(idToken: idToken, accessToken: accessToken)
         
-        try await AuthManager.shared.signInWithGoogle(tokens: tokens)
+        do{
+            try await AuthManager.shared.signInWithGoogle(tokens: tokens)
+            isAuthenticated = true
+        } catch{
+            isAuthenticated = false
+            errorMessage = error.localizedDescription
+            print("Error: \(error)")
+        }
+        
     }
 }
 
@@ -174,10 +182,12 @@ struct LoginView: View {
                 
                 Button(action: {
                     Task {
-                        do {
-                            try await viewModel.googleAuth()
-                        } catch {
-                            print(error)
+                        
+                        try await viewModel.googleAuth()
+                        
+                        if viewModel.isAuthenticated {
+                            goToHome = true
+                            dismiss()
                         }
                     }
                 }) {
@@ -186,7 +196,7 @@ struct LoginView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 50, height: 50)
                         .background(Color(hex: "#D9D9D9"))
-                        .modifier(CircularImageModifier())
+
                 }
                     
                 
