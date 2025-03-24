@@ -65,6 +65,14 @@ final class LoginEmailViewModel : ObservableObject {
     }
 }
 
+struct CircularImageModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .clipShape(Circle())
+            .contentShape(Circle())
+    }
+}
+
 struct LoginView: View {
     
     @StateObject private var viewModel = LoginEmailViewModel()
