@@ -60,9 +60,7 @@ final class LoginEmailViewModel : ObservableObject {
         }
         
         let accessToken = gidResult.user.accessToken.tokenString
-        
         let tokens = GoogleSignInResultModel(idToken: idToken, accessToken: accessToken)
-        
         try await AuthManager.shared.signInWithGoogle(tokens: tokens)
     }
 }
