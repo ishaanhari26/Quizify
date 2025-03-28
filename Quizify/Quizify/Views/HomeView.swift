@@ -61,6 +61,17 @@ struct HomeView: View {
             Divider()
                 .padding(.top)
             
+            NavigationLink(destination: UserDiscoveryView()) {
+                HStack(spacing: 15) {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(hex: "#C97D60"))
+                    Text("Find Users")
+                        .font(.custom("Kiwi Maru Light", size: 16))
+                        .foregroundColor(.black)
+                }
+            }
+            
             VStack(alignment: .leading, spacing: 20) {
                 NavigationLink(destination: ProfileView().environmentObject(dataManager)) {
                     HStack(spacing: 15) {

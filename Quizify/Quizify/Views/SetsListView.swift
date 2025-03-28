@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct SetsListView: View {
     @EnvironmentObject var dataManager: DataManager
@@ -296,6 +297,8 @@ struct SetDetailView: View {
     @State private var flipped = false
     @Environment(\.dismiss) var dismiss
     @StateObject private var timeTracker = StudyTimeTracker()
+    @State private var showVisibilityToggle = false
+    @State private var isOwner = false
     
     let setID: String
     let setTitle: String
@@ -308,6 +311,16 @@ struct SetDetailView: View {
             VStack(spacing: 0) {
                 // Custom header
                 headerView
+                
+                if isOwner {
+                    HStack {
+                        Spacer()
+                        SetVisibilityToggle(setID: setID)
+                            .frame(width: 150)
+                            .padding(.trailing, 20)
+                    }
+                    .padding(.top, 10)
+                }
                 
                 if timeTracker.isTracking {
                     studyTimerView
@@ -388,6 +401,9 @@ struct SetDetailView: View {
             if !timeTracker.isTracking {
                 timeTracker.startTracking(setID: setID)
             }
+            
+            // Check if current user is the owner of this set
+            checkOwnership()
         }
         .onDisappear {
             // Stop tracking when view disappears
@@ -638,6 +654,25 @@ struct SetDetailView: View {
             .disabled(currentCardIndex >= cards.count - 1)
         }
         .padding(.vertical, 10)
+    }
+    
+    
+    
+    private func checkOwnership() {
+        guard let currentUserID = AuthManager.shared.getUserID() else {
+            isOwner = false
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("Sets").document(setID).getDocument { document, error in
+            if let document = document, document.exists {
+                let ownerID = document.data()?["userID"] as? String ?? ""
+                self.isOwner = (ownerID == currentUserID)
+            } else {
+                self.isOwner = false
+            }
+        }
     }
     
     // Removed allCardsList since it's now integrated directly in the body

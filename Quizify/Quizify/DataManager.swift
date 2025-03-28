@@ -8,6 +8,7 @@
 import Foundation
 import Firebase
 import FirebaseFirestore
+import FirebaseAuth
 
 // Update in DataManager.swift
 struct Set: Identifiable {
@@ -563,6 +564,221 @@ extension DataManager {
         group.notify(queue: .main) {
             let sortedData = dailyData.sorted(by: { $0.date < $1.date })
             completion(sortedData)
+        }
+    }
+}
+
+// Add to DataManager.swift - Public Sets Support
+
+extension DataManager {
+    // Add a new set with public visibility option
+    func addSet(title: String, description: String?, cards: [FlashCard], isPublic: Bool = false) {
+        let db = Firestore.firestore()
+        
+        // Get the current user ID, if available
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot create set: No user is signed in")
+            return
+        }
+        
+        // Create a new document in the Sets collection
+        let setRef = db.collection("Sets").document()
+        let setID = setRef.documentID
+        
+        // Include the userID and public flag in the set data
+        let setData: [String: Any] = [
+            "title": title,
+            "description": description ?? "",
+            "cardCount": cards.count,
+            "createdAt": Timestamp(date: Date()),
+            "userID": userID,
+            "isPublic": isPublic  // Add public visibility flag
+        ]
+        
+        // Create the set document
+        setRef.setData(setData) { error in
+            if let error = error {
+                print("Error creating set: \(error.localizedDescription)")
+                return
+            }
+            
+            // After creating the set, add each card to the Cards subcollection
+            for (index, card) in cards.enumerated() {
+                let cardRef = setRef.collection("Cards").document()
+                
+                let cardData: [String: Any] = [
+                    "term": card.term,
+                    "definition": card.definition,
+                    "position": index,
+                    "createdAt": Timestamp(date: Date())
+                ]
+                
+                cardRef.setData(cardData) { error in
+                    if let error = error {
+                        print("Error adding card: \(error.localizedDescription)")
+                    }
+                }
+            }
+            
+            // Update the user's setCount in their profile
+            self.incrementUserSetCount(userID: userID)
+            
+            // Refresh the sets list after adding
+            self.fetchSets()
+        }
+    }
+    
+    // Make an existing set public or private
+    func updateSetVisibility(setID: String, isPublic: Bool, completion: @escaping (Bool) -> Void = { _ in }) {
+        let db = Firestore.firestore()
+        let setRef = db.collection("Sets").document(setID)
+        
+        setRef.updateData([
+            "isPublic": isPublic
+        ]) { error in
+            if let error = error {
+                print("Error updating set visibility: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            completion(true)
+            
+            // Refresh the sets list
+            self.fetchSets()
+        }
+    }
+    
+    // Keep track of the number of sets a user has created
+    private func incrementUserSetCount(userID: String) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users").document(userID)
+        
+        // First get the current count
+        userRef.getDocument { document, error in
+            var currentCount = 0
+            
+            if let document = document, document.exists {
+                currentCount = document.data()?["setCount"] as? Int ?? 0
+            }
+            
+            // Increment the count
+            userRef.setData([
+                "setCount": currentCount + 1,
+                "email": Auth.auth().currentUser?.email ?? "",
+                "updatedAt": Timestamp(date: Date())
+            ], merge: true) { error in
+                if let error = error {
+                    print("Error updating user set count: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // Update user profile information
+    func updateUserProfile(displayName: String? = nil, username: String? = nil, completion: @escaping (Bool) -> Void = { _ in }) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(false)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users").document(userID)
+        
+        var userData: [String: Any] = [
+            "updatedAt": Timestamp(date: Date())
+        ]
+        
+        if let displayName = displayName {
+            userData["displayName"] = displayName
+        }
+        
+        if let username = username {
+            userData["username"] = username.lowercased()
+        }
+        
+        // Make sure we have the email
+        if let email = Auth.auth().currentUser?.email {
+            userData["email"] = email
+        }
+        
+        // Add createdAt if this is the first time
+        userRef.getDocument { document, error in
+            if let document = document, !document.exists {
+                userData["createdAt"] = Timestamp(date: Date())
+                userData["setCount"] = 0
+                userData["currentStreak"] = 0
+                userData["maxStreak"] = 0
+            }
+            
+            userRef.setData(userData, merge: true) { error in
+                if let error = error {
+                    print("Error updating user profile: \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                
+                completion(true)
+            }
+        }
+    }
+    
+    func updateUserDisplayName(username: String? = nil, displayName: String? = nil, completion: @escaping (Bool) -> Void = { _ in }) {
+        guard let userID = AuthManager.shared.getUserID(), let user = Auth.auth().currentUser else {
+            completion(false)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users").document(userID)
+        
+        // Get the existing user data
+        userRef.getDocument { document, error in
+            var userData: [String: Any] = [
+                "updatedAt": Timestamp(date: Date())
+            ]
+            
+            // Get email
+            let email = user.email ?? ""
+            userData["email"] = email
+            
+            // Username logic
+            if let username = username, !username.isEmpty {
+                userData["username"] = username.lowercased()
+            } else if let existingUsername = document?.data()?["username"] as? String, !existingUsername.isEmpty {
+                // Keep existing username
+            } else {
+                // Generate username from email if both are missing
+                userData["username"] = email.components(separatedBy: "@").first?.lowercased() ?? "user"
+            }
+            
+            // Display name logic
+            if let displayName = displayName, !displayName.isEmpty {
+                userData["displayName"] = displayName
+            } else if let existingDisplayName = document?.data()?["displayName"] as? String, !existingDisplayName.isEmpty {
+                // Keep existing display name
+            } else {
+                // Generate display name from username or email
+                let generatedUsername = userData["username"] as? String ?? email.components(separatedBy: "@").first ?? "User"
+                userData["displayName"] = generatedUsername.capitalized
+            }
+            
+            // Add createdAt if this is the first time
+            if document == nil || !document!.exists {
+                userData["createdAt"] = Timestamp(date: Date())
+                userData["setCount"] = 0
+                userData["currentStreak"] = 0
+                userData["maxStreak"] = 0
+            }
+            
+            userRef.setData(userData, merge: true) { error in
+                if let error = error {
+                    print("Error updating user profile: \(error.localizedDescription)")
+                    completion(false)
+                } else {
+                    completion(true)
+                }
+            }
         }
     }
 }

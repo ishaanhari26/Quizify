@@ -17,6 +17,8 @@ struct ManualCreateView: View {
     @EnvironmentObject var dataManager: DataManager
     @Environment(\.dismiss) var dismiss
     
+    
+    @State private var isPublic = false
     @State private var showDescription = false
     @State private var descriptionText = ""
     @State private var titleText = ""
@@ -41,6 +43,22 @@ struct ManualCreateView: View {
                         
                         // Description
                         descriptionSection
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            Toggle(isOn: $isPublic) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: isPublic ? "globe" : "lock")
+                                        .foregroundColor(isPublic ? Color(hex: "#6082C9") : .gray)
+                                    
+                                    Text(isPublic ? "Public - visible to all users" : "Private - only visible to you")
+                                        .font(.custom("Kiwi Maru Light", size: 16))
+                                        .foregroundColor(isPublic ? Color(hex: "#6082C9") : .gray)
+                                }
+                            }
+                            .toggleStyle(SwitchToggleStyle(tint: Color(hex: "#6082C9")))
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 10)
                         
                         // Cards
                         cardsList
@@ -269,7 +287,8 @@ struct ManualCreateView: View {
         dataManager.addSet(
             title: titleText,
             description: showDescription ? descriptionText : nil,
-            cards: cards
+            cards: cards,
+            isPublic: isPublic
         )
         
         // Wait a moment before dismissing to allow Firebase operation to complete
