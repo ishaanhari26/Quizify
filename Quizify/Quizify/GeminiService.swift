@@ -53,7 +53,7 @@ actor GeminiService {
             
             Each flashcard should have:
             1. A clear, concise term (1-5 words if possible)
-            2. A comprehensive but concise definition, that is brief
+            2. A comprehensive but concise definition, that is brief (1-2 Short Sentences)
             
             Example format:
             [
