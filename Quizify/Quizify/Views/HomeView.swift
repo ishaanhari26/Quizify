@@ -60,7 +60,7 @@ struct HomeView: View {
                 .padding(.top)
             
             VStack(alignment: .leading, spacing: 20) {
-                NavigationLink(destination: Text("Profile View")) {
+                NavigationLink(destination: ProfileView()) {
                     HStack(spacing: 15) {
                         Image(systemName: "person.fill")
                             .font(.system(size: 20))

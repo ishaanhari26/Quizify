@@ -22,6 +22,10 @@ struct QuizifyApp: App {
         WindowGroup {
             GreetingView()
                 .environmentObject(dataManager)
+                .onAppear {
+                    // Register for remote notifications
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
         }
     }
 }
@@ -31,5 +35,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
         return true
+    }
+    
+    // Add this method to handle remote notifications
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        // Forward the notification to Firebase Auth
+        if Auth.auth().canHandleNotification(userInfo) {
+            completionHandler(.noData)
+            return
+        }
+        completionHandler(.newData)
     }
 }
