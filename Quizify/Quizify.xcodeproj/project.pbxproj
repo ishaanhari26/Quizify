@@ -26,6 +26,7 @@
 		CB0FC1372D962BC1004A8530 /* TwoFactorSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC1362D962BC1004A8530 /* TwoFactorSettingsView.swift */; };
 		CB0FC1392D962BDC004A8530 /* TwoFactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC1382D962BDC004A8530 /* TwoFactorAuthView.swift */; };
 		CB0FC13B2D962C48004A8530 /* PhoneNumberEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC13A2D962C48004A8530 /* PhoneNumberEntryView.swift */; };
+		CB0FC13F2D96341A004A8530 /* KeyboardDismisser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC13E2D96341A004A8530 /* KeyboardDismisser.swift */; };
 		CB6602952CE66DCA004BD579 /* KiwiMaru-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25B2CE42A2F001F8ED0 /* KiwiMaru-Light.ttf */; };
 		CB6602962CE66DCA004BD579 /* KiwiMaru-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */; };
 		CB6602972CE66DCA004BD579 /* KiwiMaru-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */; };
@@ -76,6 +77,7 @@
 		CB0FC1362D962BC1004A8530 /* TwoFactorSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoFactorSettingsView.swift; sourceTree = "<group>"; };
 		CB0FC1382D962BDC004A8530 /* TwoFactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoFactorAuthView.swift; sourceTree = "<group>"; };
 		CB0FC13A2D962C48004A8530 /* PhoneNumberEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberEntryView.swift; sourceTree = "<group>"; };
+		CB0FC13E2D96341A004A8530 /* KeyboardDismisser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardDismisser.swift; sourceTree = "<group>"; };
 		CB6602982CE67605004BD579 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		CB66029A2CE6BF65004BD579 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CB82DE5D2D89E57300E73551 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 				CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */,
 				CB0FC1362D962BC1004A8530 /* TwoFactorSettingsView.swift */,
 				CB0FC1382D962BDC004A8530 /* TwoFactorAuthView.swift */,
+				CB0FC13E2D96341A004A8530 /* KeyboardDismisser.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -390,6 +393,7 @@
 				CB0FC13B2D962C48004A8530 /* PhoneNumberEntryView.swift in Sources */,
 				9D735F882D903E8100E78630 /* Utilities.swift in Sources */,
 				CB8332832D6913EE00ACDC99 /* AuthManager.swift in Sources */,
+				CB0FC13F2D96341A004A8530 /* KeyboardDismisser.swift in Sources */,
 				CBECC2572CE4277A001F8ED0 /* LoginView.swift in Sources */,
 				CB00ED072D8F3E29001182C0 /* GeminiService.swift in Sources */,
 				CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */,

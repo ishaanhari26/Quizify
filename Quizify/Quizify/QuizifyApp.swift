@@ -9,14 +9,16 @@ import SwiftUI
 import Firebase
 import FirebaseAuth
 
-
-
 @main
 struct QuizifyApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject var dataManager = DataManager()
     
+    init() {
+        // Set up keyboard dismissal
+        KeyboardDismisser.shared.setupKeyboardDismissal()
+    }
     
     var body: some Scene {
         WindowGroup {
