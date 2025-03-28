@@ -415,7 +415,6 @@ struct SetDetailView: View {
     }
     
     // MARK: - Component Views
-    
     private var headerView: some View {
         ZStack {
             Color(hex: "#C97D60").ignoresSafeArea(edges: .top)
@@ -438,10 +437,13 @@ struct SetDetailView: View {
                     
                     Spacer()
                     
-                    // Add a study progress button or icon here if needed
-                    Color.clear
-                        .frame(width: 22, height: 22)
-                        .padding(.trailing, 20)
+                    // Add a game button
+                    NavigationLink(destination: MatchingGameView(setID: setID, setTitle: setTitle)) {
+                        Image(systemName: "gamecontroller.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 22))
+                    }
+                    .padding(.trailing, 20)
                 }
                 .padding(.top, 25)
                 .padding(.bottom, 15)
@@ -449,6 +451,23 @@ struct SetDetailView: View {
         }
         .frame(height: 75)
     }
+    
+//    ADD ANYWHERE
+//    Button(action: {
+//        // This action will be handled by the NavigationLink
+//    }) {
+//        NavigationLink(destination: MatchingGameView(setID: setID, setTitle: setTitle)) {
+//            ZStack {
+//                Circle()
+//                    .fill(Color(hex: "#6082C9"))
+//                    .frame(width: 60, height: 60)
+//                
+//                Image(systemName: "gamecontroller.fill")
+//                    .font(.system(size: 24))
+//                    .foregroundColor(.white)
+//            }
+//        }
+//    }
     
     private var loadingView: some View {
         VStack {
