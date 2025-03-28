@@ -200,7 +200,7 @@ struct SetsListView: View {
     }
 }
 
-// Custom Set Card View component
+// Update SetCardView in SetsListView.swift
 struct SetCardView: View {
     let set: Set
     
@@ -234,13 +234,33 @@ struct SetCardView: View {
                     Text(description)
                         .font(.custom("Kiwi Maru Light", size: 14))
                         .foregroundColor(.secondary)
-                        .lineLimit(2)
+                        .lineLimit(1)
                 }
                 
-                // Date formatter
-                Text(formattedDate(set.createdAt))
-                    .font(.custom("Kiwi Maru Light", size: 12))
-                    .foregroundColor(Color(hex: "#C97D60"))
+                // Study time and date info
+                HStack {
+                    // Date formatter
+                    Text(formattedDate(set.createdAt))
+                        .font(.custom("Kiwi Maru Light", size: 12))
+                        .foregroundColor(Color(hex: "#C97D60"))
+                    
+                    // Study time if available
+                    if let totalTime = set.totalStudyTime, totalTime > 0 {
+                        Circle()
+                            .fill(Color(hex: "#C97D60").opacity(0.5))
+                            .frame(width: 4, height: 4)
+                        
+                        HStack(spacing: 2) {
+                            Image(systemName: "clock")
+                                .font(.system(size: 10))
+                                .foregroundColor(Color(hex: "#C97D60"))
+                            
+                            Text(set.formattedStudyTime)
+                                .font(.custom("Kiwi Maru Light", size: 12))
+                                .foregroundColor(Color(hex: "#C97D60"))
+                        }
+                    }
+                }
             }
             .padding(.vertical, 10)
             
@@ -275,6 +295,7 @@ struct SetDetailView: View {
     @State private var currentCardIndex = 0
     @State private var flipped = false
     @Environment(\.dismiss) var dismiss
+    @StateObject private var timeTracker = StudyTimeTracker()
     
     let setID: String
     let setTitle: String
@@ -287,6 +308,10 @@ struct SetDetailView: View {
             VStack(spacing: 0) {
                 // Custom header
                 headerView
+                
+                if timeTracker.isTracking {
+                    studyTimerView
+                }
                 
                 // Content
                 if isLoading {
@@ -358,8 +383,35 @@ struct SetDetailView: View {
         }
         .onAppear {
             loadCards()
+            
+            // Start tracking time when view appears
+            if !timeTracker.isTracking {
+                timeTracker.startTracking(setID: setID)
+            }
+        }
+        .onDisappear {
+            // Stop tracking when view disappears
+            if timeTracker.isTracking {
+                timeTracker.stopTracking(dataManager: dataManager)
+            }
         }
         .navigationBarBackButtonHidden(true)
+    }
+    
+    private var studyTimerView: some View {
+        HStack {
+            Image(systemName: "clock")
+                .foregroundColor(Color(hex: "#C97D60"))
+            
+            Text(timeTracker.formattedTime(from: timeTracker.elapsedTime))
+                .font(.custom("Kiwi Maru Regular", size: 16))
+                .foregroundColor(Color(hex: "#C97D60"))
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 15)
+        .background(Color(hex: "#C97D60").opacity(0.1))
+        .cornerRadius(15)
+        .padding(.top, 10)
     }
     
     // MARK: - Component Views

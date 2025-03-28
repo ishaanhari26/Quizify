@@ -93,12 +93,12 @@ struct HomeView: View {
                     }
                 }
                 
-                NavigationLink(destination: Text("Help View")) {
+                NavigationLink(destination: StudyAnalyticsView().environmentObject(dataManager)) {
                     HStack(spacing: 15) {
-                        Image(systemName: "questionmark.circle.fill")
+                        Image(systemName: "chart.xyaxis.line")
                             .font(.system(size: 20))
                             .foregroundColor(Color(hex: "#C97D60"))
-                        Text("Help")
+                        Text("Analytics")
                             .font(.custom("Kiwi Maru Light", size: 16))
                             .foregroundColor(.black)
                     }
@@ -322,7 +322,7 @@ struct HomeView: View {
     }
 }
 
-// Custom Set Tile View for the horizontal scroll
+// Update SetTileView in HomeView.swift or SetsListView.swift
 struct SetTileView: View {
     let set: Set
     
@@ -339,6 +339,13 @@ struct SetTileView: View {
                     .foregroundColor(.white)
                 
                 Spacer()
+                
+                // Add study time indicator if available
+                if let _ = set.totalStudyTime, let totalTime = set.totalStudyTime, totalTime > 0 {
+                    Image(systemName: "clock")
+                        .foregroundColor(.white)
+                        .font(.system(size: 12))
+                }
             }
             .padding(.horizontal, 10)
             .padding(.top, 10)
@@ -352,7 +359,22 @@ struct SetTileView: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
                 .padding(.horizontal, 10)
-                .padding(.bottom, 10)
+            
+            // Add study time if available and greater than zero
+            if let totalTime = set.totalStudyTime, totalTime > 0 {
+                Text(set.formattedStudyTime)
+                    .font(.custom("Kiwi Maru Light", size: 12))
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 5)
+            } else {
+                Spacer().frame(height: 5)
+            }
+            
+            // Bottom padding if no study time
+            if set.totalStudyTime == nil || set.totalStudyTime == 0 {
+                Spacer().frame(height: 10)
+            }
         }
         .frame(width: 160, height: 145)
         .background(Color(hex: "#C97D60"))

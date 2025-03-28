@@ -9,14 +9,29 @@ import Foundation
 import Firebase
 import FirebaseFirestore
 
+// Update in DataManager.swift
 struct Set: Identifiable {
     var id: String
     var title: String
     var description: String?
     var cardCount: Int
     var createdAt: Date
+    var totalStudyTime: TimeInterval?
+    
+    // Format the total study time
+    var formattedStudyTime: String {
+        guard let time = totalStudyTime else { return "Not studied yet" }
+        
+        let hours = Int(time) / 3600
+        let minutes = (Int(time) % 3600) / 60
+        
+        if hours > 0 {
+            return "\(hours)h \(minutes)m"
+        } else {
+            return "\(minutes)m"
+        }
+    }
 }
-
 struct Card: Identifiable {
     var id: String
     var term: String
@@ -56,7 +71,7 @@ class DataManager: ObservableObject {
             }
         }
     }
-    
+    // Update in DataManager.swift
     func fetchSets() {
         sets.removeAll()
         let db = Firestore.firestore()
@@ -68,6 +83,11 @@ class DataManager: ObservableObject {
             }
             
             if let snapshot = snapshot {
+                // Create a dispatch group to wait for all sets to be processed
+                let group = DispatchGroup()
+                
+                var tempSets: [Set] = []
+                
                 for document in snapshot.documents {
                     let data = document.data()
                     
@@ -77,14 +97,31 @@ class DataManager: ObservableObject {
                     let cardCount = data["cardCount"] as? Int ?? 0
                     let timestamp = data["createdAt"] as? Timestamp ?? Timestamp(date: Date())
                     
-                    let set = Set(
+                    // Create a set without study time initially
+                    var newSet = Set(
                         id: id,
                         title: title,
                         description: description,
                         cardCount: cardCount,
                         createdAt: timestamp.dateValue()
                     )
-                    self.sets.append(set)
+                    
+                    // Enter the dispatch group to fetch study time
+                    group.enter()
+                    
+                    // Fetch study time for this set
+                    self.getTotalStudyTime(setID: id) { totalTime in
+                        newSet.totalStudyTime = totalTime
+                        
+                        tempSets.append(newSet)
+                        group.leave()
+                    }
+                }
+                
+                // When all sets have been processed, sort and publish
+                group.notify(queue: .main) {
+                    // Sort by most recently created
+                    self.sets = tempSets.sorted(by: { $0.createdAt > $1.createdAt })
                 }
             }
         }
@@ -211,6 +248,57 @@ class DataManager: ObservableObject {
                 }
                 
                 completion(true)
+            }
+        }
+    }
+}
+
+// Add to DataManager.swift
+extension DataManager {
+    // Record study time for a set
+    func recordStudyTime(setID: String, duration: TimeInterval) {
+        let db = Firestore.firestore()
+        let studyTimeRef = db.collection("StudyTimes").document()
+        
+        let studyData: [String: Any] = [
+            "setID": setID,
+            "duration": duration,
+            "timestamp": Timestamp(date: Date())
+        ]
+        
+        studyTimeRef.setData(studyData) { error in
+            if let error = error {
+                print("Error recording study time: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    // Get total study time for a set
+    func getTotalStudyTime(setID: String, completion: @escaping (TimeInterval) -> Void) {
+        let db = Firestore.firestore()
+        let studyTimesRef = db.collection("StudyTimes").whereField("setID", isEqualTo: setID)
+        
+        studyTimesRef.getDocuments { snapshot, error in
+            guard error == nil else {
+                print(error!.localizedDescription)
+                completion(0)
+                return
+            }
+            
+            var totalTime: TimeInterval = 0
+            
+            if let snapshot = snapshot {
+                for document in snapshot.documents {
+                    let data = document.data()
+                    
+                    if let duration = data["duration"] as? TimeInterval {
+                        totalTime += duration
+                    }
+                }
+                
+                completion(totalTime)
+            } else {
+                completion(0)
             }
         }
     }
