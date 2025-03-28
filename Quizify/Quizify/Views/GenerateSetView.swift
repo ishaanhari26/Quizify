@@ -25,6 +25,7 @@ struct GenerateSetView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = GenerateSetViewModel()
     @State private var showConfirmation = false
+   
     
     // Predefined subjects to help users with prompts
     let subjectSuggestions = [
@@ -203,6 +204,22 @@ struct GenerateSetView: View {
                     }
                 }
             }
+            
+            VStack(alignment: .leading, spacing: 10) {
+                Toggle(isOn: $viewModel.isPublic) {
+                    HStack(spacing: 8) {
+                        Image(systemName: viewModel.isPublic ? "globe" : "lock")
+                            .foregroundColor(viewModel.isPublic ? Color(hex: "#6082C9") : .gray)
+                        
+                        Text(viewModel.isPublic ? "Public - visible to all users" : "Private - only visible to you")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(viewModel.isPublic ? Color(hex: "#6082C9") : .gray)
+                    }
+                }
+                .toggleStyle(SwitchToggleStyle(tint: Color(hex: "#6082C9")))
+            }
+            .padding(.horizontal)
+            .padding(.top, 10)
         }
     }
     

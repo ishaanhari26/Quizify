@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 struct ProfileView: View {
     @EnvironmentObject var dataManager: DataManager
@@ -16,6 +17,8 @@ struct ProfileView: View {
     @State private var isLoading = true
     @Environment(\.dismiss) var dismiss
     @State private var studyStreak: Int = 0
+    @State private var username: String = ""
+    @State private var displayName: String = ""
     
     var body: some View {
         ZStack {
@@ -78,13 +81,25 @@ struct ProfileView: View {
                             
                             
                             VStack(spacing: 5) {
-                                // Existing user email display
-                                Text(userEmail)
+                                // User display name
+                                Text(displayName)
                                     .font(.custom("Kiwi Maru Regular", size: 18))
                                     .foregroundColor(.black)
                                 
+                                // Username
+                                Text("@\(username)")
+                                    .font(.custom("Kiwi Maru Light", size: 16))
+                                    .foregroundColor(.gray)
+                                
+                                // Email
+                                Text(userEmail)
+                                    .font(.custom("Kiwi Maru Light", size: 14))
+                                    .foregroundColor(.gray)
+                                    .padding(.top, 2)
+                                
+                                // 2FA status and streak badge row
                                 HStack {
-                                    // 2FA status (existing)
+                                    // 2FA status
                                     HStack {
                                         Image(systemName: is2FAEnabled ? "checkmark.shield.fill" : "shield")
                                             .foregroundColor(is2FAEnabled ? .green : .gray)
@@ -117,14 +132,36 @@ struct ProfileView: View {
                                 .padding(.top, 5)
                             }
                             
-                            // In onAppear, add this to fetch streak information
+                            // Update the onAppear section to fetch the username
                             .onAppear {
                                 isLoading = true
                                 
-                                // Get user info
+                                // Get user info from Firebase Auth
                                 if let user = Auth.auth().currentUser {
                                     userEmail = user.email ?? "No email"
                                     is2FAEnabled = user.phoneNumber != nil
+                                    
+                                    // Fetch additional user data from Firestore
+                                    if let userID = AuthManager.shared.getUserID() {
+                                        let db = Firestore.firestore()
+                                        
+                                        db.collection("Users").document(userID).getDocument { document, error in
+                                            if let document = document, document.exists, let userData = document.data() {
+                                                // Get username and display name
+                                                self.username = userData["username"] as? String ?? ""
+                                                self.displayName = userData["displayName"] as? String ?? self.username
+                                            }
+                                            
+                                            // If username is empty, set a default based on email
+                                            if self.username.isEmpty && !userEmail.isEmpty {
+                                                self.username = userEmail.components(separatedBy: "@").first?.lowercased() ?? ""
+                                                self.displayName = self.username.capitalized
+                                                
+                                                // Save this to Firestore
+                                                dataManager.updateUserDisplayName(username: self.username, displayName: self.displayName)
+                                            }
+                                        }
+                                    }
                                 }
                                 
                                 // Get study streak
@@ -171,6 +208,16 @@ struct ProfileView: View {
                                         // Handle account settings
                                     }
                                 )
+                                
+                                Divider().padding(.leading, 50)
+                                
+                                NavigationLink(destination: PublicSetsManagerView().environmentObject(dataManager)) {
+                                    SettingsOptionView(
+                                        icon: "globe",
+                                        title: "Public Sets",
+                                        action: {}
+                                    )
+                                }
                                 
                                 Divider().padding(.leading, 50)
                                 
