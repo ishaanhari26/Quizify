@@ -206,7 +206,7 @@ struct UserDiscoveryView: View {
                 
                 // Search bar
                 HStack {
-                    TextField("Search by email", text: $viewModel.searchText)
+                    TextField("Search by Username", text: $viewModel.searchText)
                         .font(.custom("Kiwi Maru Regular", size: 16))
                         .padding(10)
                         .background(Color.gray.opacity(0.1))
@@ -325,10 +325,7 @@ struct UserRow: View {
                         .font(.custom("Kiwi Maru Light", size: 14))
                         .foregroundColor(.gray)
                 }
-                
-                Text(user.email)
-                    .font(.custom("Kiwi Maru Light", size: 14))
-                    .foregroundColor(.gray)
+    
             }
             
             Spacer()

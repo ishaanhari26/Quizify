@@ -13,10 +13,10 @@ final class SignInEmailViewModel : ObservableObject {
     
     @Published var email = ""
     @Published var password = ""
-    @Published var username = ""
     @Published var isAuthenticated = false
     @Published var errorMessage = ""
     @Published var shouldShowTwoFactor = false
+    @Published var shouldShowOnboarding = false
     
     init() {
         
@@ -28,33 +28,9 @@ final class SignInEmailViewModel : ObservableObject {
             return
         }
         
-        guard !username.isEmpty else {
-            errorMessage = "Please enter a username"
-            return
-        }
-        
-        // Check if username contains only letters, numbers, and underscores
-        let usernameRegex = "^[a-zA-Z0-9_]+$"
-        if let regex = try? NSRegularExpression(pattern: usernameRegex) {
-            let range = NSRange(location: 0, length: username.utf16.count)
-            if regex.firstMatch(in: username, options: [], range: range) == nil {
-                errorMessage = "Username can only contain letters, numbers, and underscores"
-                return
-            }
-        }
-        
         Task {
             do {
-                // First, check if the username is already taken
-                if try await isUsernameTaken(username: username) {
-                    errorMessage = "This username is already taken"
-                    return
-                }
-                
                 let returnedUserData = try await AuthManager.shared.createUser(email: email, password: password)
-                
-                // Save the username to Firestore
-                try await saveUserProfile(userId: returnedUserData.uid)
                 
                 // After successful signup, prompt for 2FA setup
                 isAuthenticated = true
@@ -69,34 +45,6 @@ final class SignInEmailViewModel : ObservableObject {
             }
         }
     }
-    
-    private func isUsernameTaken(username: String) async throws -> Bool {
-        let db = Firestore.firestore()
-        
-        let snapshot = try await db.collection("Users")
-            .whereField("username", isEqualTo: username.lowercased())
-            .getDocuments()
-        
-        return !snapshot.documents.isEmpty
-    }
-    
-    private func saveUserProfile(userId: String) async throws {
-        let db = Firestore.firestore()
-        let userRef = db.collection("Users").document(userId)
-        
-        let userData: [String: Any] = [
-            "username": username.lowercased(),
-            "displayName": username,
-            "email": email,
-            "setCount": 0,
-            "currentStreak": 0,
-            "maxStreak": 0,
-            "createdAt": Timestamp(date: Date()),
-            "updatedAt": Timestamp(date: Date())
-        ]
-        
-        try await userRef.setData(userData)
-    }
 }
 
 struct SignupView: View {
@@ -105,10 +53,11 @@ struct SignupView: View {
     
     @Environment(\.dismiss) var dismiss
     @State private var name: String = ""
-    @FocusState private var isUsernameFocused: Bool
     @FocusState private var isEmailFocused: Bool
     @FocusState private var isPasswordFocused: Bool
     @Binding var goToHome: Bool
+    @State private var showOnboarding = false
+    @State private var shouldDismissView = false
     
     var body: some View {
         ZStack {
@@ -140,22 +89,6 @@ struct SignupView: View {
                     .font(.custom("Kiwi Maru Regular", size: 30))
                 
                 VStack(spacing: 20){
-                    // Username field (New)
-                    TextField("Username", text: $viewModel.username)
-                        .textInputAutocapitalization(.never)
-                        .font(.custom("Kiwi Maru Regular", size: 18))
-                        .frame(width: 297, height: 52)
-                        .padding(.horizontal)
-                        .background(Color(hex: "#CECECE").opacity(0.2))
-                        .cornerRadius(20)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color(hex: "#C97D60"),
-                                        lineWidth: isUsernameFocused ? 7 : 3)
-                                .animation(.easeInOut(duration: 0.2), value: isUsernameFocused)
-                        )
-                        .focused($isUsernameFocused)
-                    
                     TextField("Email", text: $viewModel.email)
                         .textInputAutocapitalization(.never)
                         .font(.custom("Kiwi Maru Regular", size: 18))
@@ -192,8 +125,8 @@ struct SignupView: View {
                         // Wait a bit for the sign-in process to complete
                         try? await Task.sleep(nanoseconds: 1_000_000_000)
                         if viewModel.isAuthenticated {
-                            goToHome = true
-                            dismiss()
+                            // Don't go to home yet, proceed to onboarding after 2FA
+                            viewModel.shouldShowOnboarding = true
                         }
                     }
                 } label: {
@@ -223,7 +156,23 @@ struct SignupView: View {
         .ignoresSafeArea(.keyboard)
         .frame(maxHeight: 650)
         .sheet(isPresented: $viewModel.shouldShowTwoFactor) {
-            PhoneNumberEntryView(goToHome: $goToHome)
+            PhoneNumberEntryView(goToHome: .constant(false), showOnboarding: $showOnboarding)
+                .onDisappear {
+                    if showOnboarding {
+                        viewModel.shouldShowOnboarding = true
+                    }
+                }
+        }
+        .fullScreenCover(isPresented: $viewModel.shouldShowOnboarding) {
+            OnboardingView(goToHome: $goToHome, dismissParent: $shouldDismissView)
+        }
+        
+        // And add this to watch for changes to shouldDismissView:
+        .onChange(of: shouldDismissView) { newValue in
+            if newValue {
+                // Dismiss this view
+                dismiss()
+            }
         }
     }
 }
