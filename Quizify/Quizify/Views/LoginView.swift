@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseAuth
+import FirebaseFirestore
 
 import GoogleSignIn
 import GoogleSignInSwift
@@ -60,6 +61,40 @@ final class LoginEmailViewModel : ObservableObject {
             errorMessage = error.localizedDescription
             print("Error: \(error)")
         }
+        
+        if isAuthenticated {
+            // Ensure the user has a username and display name
+            let userID = AuthManager.shared.getUserID() ?? ""
+            if !userID.isEmpty {
+                let db = Firestore.firestore()
+                let userRef = db.collection("Users").document(userID)
+                
+                userRef.getDocument { document, error in
+                    // Check if the user document exists
+                    if document == nil || !document!.exists {
+                        // User logged in but doesn't have a Firestore record, create one
+                        let email = Auth.auth().currentUser?.email ?? ""
+                        let generatedUsername = email.components(separatedBy: "@").first?.lowercased() ?? "user"
+                        
+                        let userData: [String: Any] = [
+                            "email": email,
+                            "username": generatedUsername,
+                            "displayName": generatedUsername.capitalized,
+                            "setCount": 0,
+                            "currentStreak": 0,
+                            "maxStreak": 0,
+                            "createdAt": Timestamp(date: Date()),
+                            "updatedAt": Timestamp(date: Date())
+                        ]
+                        
+                        userRef.setData(userData) { _ in
+                            // Proceed with login flow
+                        }
+                    }
+                }
+            }
+        }
+        
     }
     
     func googleAuth() async throws {
@@ -97,6 +132,42 @@ final class LoginEmailViewModel : ObservableObject {
             errorMessage = error.localizedDescription
             print("Error: \(error)")
         }
+        
+        
+        if isAuthenticated {
+            // Ensure the user has a username and display name
+            let userID = AuthManager.shared.getUserID() ?? ""
+            if !userID.isEmpty {
+                let db = Firestore.firestore()
+                let userRef = db.collection("Users").document(userID)
+                
+                userRef.getDocument { document, error in
+                    // Check if the user document exists
+                    if document == nil || !document!.exists {
+                        // User logged in with Google but doesn't have a Firestore record, create one
+                        let email = Auth.auth().currentUser?.email ?? ""
+                        let displayName = Auth.auth().currentUser?.displayName ?? ""
+                        let generatedUsername = email.components(separatedBy: "@").first?.lowercased() ?? "user"
+                        
+                        let userData: [String: Any] = [
+                            "email": email,
+                            "username": generatedUsername,
+                            "displayName": displayName.isEmpty ? generatedUsername.capitalized : displayName,
+                            "setCount": 0,
+                            "currentStreak": 0,
+                            "maxStreak": 0,
+                            "createdAt": Timestamp(date: Date()),
+                            "updatedAt": Timestamp(date: Date())
+                        ]
+                        
+                        userRef.setData(userData) { _ in
+                            // Proceed with login flow
+                        }
+                    }
+                }
+            }
+        }
+        
     }
 }
 struct LoginView: View {
