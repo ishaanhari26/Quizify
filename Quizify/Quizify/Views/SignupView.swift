@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 @MainActor
 final class SignInEmailViewModel : ObservableObject {
     
@@ -15,6 +14,7 @@ final class SignInEmailViewModel : ObservableObject {
     @Published var password = ""
     @Published var isAuthenticated = false
     @Published var errorMessage = ""
+    @Published var shouldShowTwoFactor = false
     
     init() {
         
@@ -29,7 +29,11 @@ final class SignInEmailViewModel : ObservableObject {
         Task {
             do {
                 let returnedUserData = try await AuthManager.shared.createUser(email: email, password: password)
+                
+                // After successful signup, prompt for 2FA setup
                 isAuthenticated = true
+                shouldShowTwoFactor = true  // Set this to true to trigger 2FA setup
+                
                 print("Success")
                 print(returnedUserData)
             } catch {
@@ -146,6 +150,9 @@ struct SignupView: View {
         }
         .ignoresSafeArea(.keyboard)
         .frame(maxHeight: 650)
+        .sheet(isPresented: $viewModel.shouldShowTwoFactor) {
+            PhoneNumberEntryView(goToHome: $goToHome)
+        }
     }
 }
 

@@ -23,6 +23,15 @@
 		CB00ED092D8F3E47001182C0 /* GenerateSetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00ED082D8F3E47001182C0 /* GenerateSetViewModel.swift */; };
 		CB00ED0B2D8F3E65001182C0 /* GenerateSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */; };
 		CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB04898A2CEA68780037BA6F /* NewSetView.swift */; };
+		CB0FC1372D962BC1004A8530 /* TwoFactorSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC1362D962BC1004A8530 /* TwoFactorSettingsView.swift */; };
+		CB0FC1392D962BDC004A8530 /* TwoFactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC1382D962BDC004A8530 /* TwoFactorAuthView.swift */; };
+		CB0FC13B2D962C48004A8530 /* PhoneNumberEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC13A2D962C48004A8530 /* PhoneNumberEntryView.swift */; };
+		CB0FC13F2D96341A004A8530 /* KeyboardDismisser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC13E2D96341A004A8530 /* KeyboardDismisser.swift */; };
+		CB0FC1412D9635BB004A8530 /* StudyTimeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC1402D9635BB004A8530 /* StudyTimeTracker.swift */; };
+		CB0FC1432D96375D004A8530 /* StudyAnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC1422D96375D004A8530 /* StudyAnalyticsView.swift */; };
+		CB0FC14B2D964020004A8530 /* MatchingGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC14A2D964020004A8530 /* MatchingGameView.swift */; };
+		CB0FC14D2D964041004A8530 /* MatchingGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC14C2D964041004A8530 /* MatchingGameViewModel.swift */; };
+		CB0FC14F2D9640BC004A8530 /* GameTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC14E2D9640BC004A8530 /* GameTypes.swift */; };
 		CB6602952CE66DCA004BD579 /* KiwiMaru-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25B2CE42A2F001F8ED0 /* KiwiMaru-Light.ttf */; };
 		CB6602962CE66DCA004BD579 /* KiwiMaru-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */; };
 		CB6602972CE66DCA004BD579 /* KiwiMaru-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */; };
@@ -70,6 +79,15 @@
 		CB00ED082D8F3E47001182C0 /* GenerateSetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateSetViewModel.swift; sourceTree = "<group>"; };
 		CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateSetView.swift; sourceTree = "<group>"; };
 		CB04898A2CEA68780037BA6F /* NewSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSetView.swift; sourceTree = "<group>"; };
+		CB0FC1362D962BC1004A8530 /* TwoFactorSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoFactorSettingsView.swift; sourceTree = "<group>"; };
+		CB0FC1382D962BDC004A8530 /* TwoFactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoFactorAuthView.swift; sourceTree = "<group>"; };
+		CB0FC13A2D962C48004A8530 /* PhoneNumberEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberEntryView.swift; sourceTree = "<group>"; };
+		CB0FC13E2D96341A004A8530 /* KeyboardDismisser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardDismisser.swift; sourceTree = "<group>"; };
+		CB0FC1402D9635BB004A8530 /* StudyTimeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyTimeTracker.swift; sourceTree = "<group>"; };
+		CB0FC1422D96375D004A8530 /* StudyAnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyAnalyticsView.swift; sourceTree = "<group>"; };
+		CB0FC14A2D964020004A8530 /* MatchingGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchingGameView.swift; sourceTree = "<group>"; };
+		CB0FC14C2D964041004A8530 /* MatchingGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchingGameViewModel.swift; sourceTree = "<group>"; };
+		CB0FC14E2D9640BC004A8530 /* GameTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTypes.swift; sourceTree = "<group>"; };
 		CB6602982CE67605004BD579 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		CB66029A2CE6BF65004BD579 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CB82DE5D2D89E57300E73551 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
@@ -181,9 +199,12 @@
 				CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */,
 				CBAE4E9B2D63C37800D348E3 /* GoogleService-Info.plist */,
 				CBECC2292CE42702001F8ED0 /* QuizifyApp.swift */,
+				CB0FC14E2D9640BC004A8530 /* GameTypes.swift */,
 				CBECC2532CE4275A001F8ED0 /* Views */,
 				CB8332822D6913EE00ACDC99 /* AuthManager.swift */,
+				CB0FC14C2D964041004A8530 /* MatchingGameViewModel.swift */,
 				CB82DE5D2D89E57300E73551 /* DataManager.swift */,
+				CB0FC1402D9635BB004A8530 /* StudyTimeTracker.swift */,
 				9D735F862D903E4F00E78630 /* Utilities */,
 				CB00ED062D8F3E29001182C0 /* GeminiService.swift */,
 				CB00ED082D8F3E47001182C0 /* GenerateSetViewModel.swift */,
@@ -225,11 +246,17 @@
 				CBECC2562CE4277A001F8ED0 /* LoginView.swift */,
 				CB6602982CE67605004BD579 /* SignupView.swift */,
 				CB00ECF32D8C58C7001182C0 /* ProfileView.swift */,
+				CB0FC13A2D962C48004A8530 /* PhoneNumberEntryView.swift */,
 				CB66029A2CE6BF65004BD579 /* HomeView.swift */,
 				CB82DE612D89E9FF00E73551 /* SetsListView.swift */,
 				CB1D3D202D766E3B00474C31 /* DeckCreateViews */,
 				CB04898A2CEA68780037BA6F /* NewSetView.swift */,
 				CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */,
+				CB0FC1362D962BC1004A8530 /* TwoFactorSettingsView.swift */,
+				CB0FC1382D962BDC004A8530 /* TwoFactorAuthView.swift */,
+				CB0FC1422D96375D004A8530 /* StudyAnalyticsView.swift */,
+				CB0FC13E2D96341A004A8530 /* KeyboardDismisser.swift */,
+				CB0FC14A2D964020004A8530 /* MatchingGameView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -378,16 +405,25 @@
 			files = (
 				CBECC2552CE4276E001F8ED0 /* GreetingView.swift in Sources */,
 				CB82DE5E2D89E57300E73551 /* DataManager.swift in Sources */,
+				CB0FC13B2D962C48004A8530 /* PhoneNumberEntryView.swift in Sources */,
 				9D735F882D903E8100E78630 /* Utilities.swift in Sources */,
 				CB8332832D6913EE00ACDC99 /* AuthManager.swift in Sources */,
+				CB0FC13F2D96341A004A8530 /* KeyboardDismisser.swift in Sources */,
+				CB0FC14D2D964041004A8530 /* MatchingGameViewModel.swift in Sources */,
 				CBECC2572CE4277A001F8ED0 /* LoginView.swift in Sources */,
+				CB0FC14F2D9640BC004A8530 /* GameTypes.swift in Sources */,
 				CB00ED072D8F3E29001182C0 /* GeminiService.swift in Sources */,
 				CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */,
 				CB00ED0B2D8F3E65001182C0 /* GenerateSetView.swift in Sources */,
 				CB00ED092D8F3E47001182C0 /* GenerateSetViewModel.swift in Sources */,
 				CB82DE622D89E9FF00E73551 /* SetsListView.swift in Sources */,
+				CB0FC1372D962BC1004A8530 /* TwoFactorSettingsView.swift in Sources */,
 				CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */,
+				CB0FC1392D962BDC004A8530 /* TwoFactorAuthView.swift in Sources */,
 				CBECC22A2CE42702001F8ED0 /* QuizifyApp.swift in Sources */,
+				CB0FC1432D96375D004A8530 /* StudyAnalyticsView.swift in Sources */,
+				CB0FC1412D9635BB004A8530 /* StudyTimeTracker.swift in Sources */,
+				CB0FC14B2D964020004A8530 /* MatchingGameView.swift in Sources */,
 				CB00ECF42D8C58C7001182C0 /* ProfileView.swift in Sources */,
 				CB6602992CE67605004BD579 /* SignupView.swift in Sources */,
 			);

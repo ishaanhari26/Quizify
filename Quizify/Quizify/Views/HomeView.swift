@@ -21,6 +21,8 @@ struct HomeView: View {
     @State private var navigateToGreet = false
     @EnvironmentObject var dataManager: DataManager
     @State private var isLoading = true
+    @State private var analyticsData: AnalyticsSummary? = nil
+    @State private var isLoadingAnalytics = true
     
     // MARK: - Side Menu Item View
     private struct SideMenuItem: View {
@@ -60,7 +62,7 @@ struct HomeView: View {
                 .padding(.top)
             
             VStack(alignment: .leading, spacing: 20) {
-                NavigationLink(destination: Text("Profile View")) {
+                NavigationLink(destination: ProfileView().environmentObject(dataManager)) {
                     HStack(spacing: 15) {
                         Image(systemName: "person.fill")
                             .font(.system(size: 20))
@@ -93,12 +95,12 @@ struct HomeView: View {
                     }
                 }
                 
-                NavigationLink(destination: Text("Help View")) {
+                NavigationLink(destination: StudyAnalyticsView().environmentObject(dataManager)) {
                     HStack(spacing: 15) {
-                        Image(systemName: "questionmark.circle.fill")
+                        Image(systemName: "chart.xyaxis.line")
                             .font(.system(size: 20))
                             .foregroundColor(Color(hex: "#C97D60"))
-                        Text("Help")
+                        Text("Analytics")
                             .font(.custom("Kiwi Maru Light", size: 16))
                             .foregroundColor(.black)
                     }
@@ -190,6 +192,45 @@ struct HomeView: View {
                             
                             Spacer().frame(height: 30)
                             
+                            // Analytics Section
+                            VStack(alignment: .leading) {
+                                HStack {
+                                    Text("Your Study Activity")
+                                        .font(.custom("Kiwi Maru Light", size: 25))
+                                        .foregroundColor(Color(.gray))
+                                    
+                                    Spacer()
+                                    
+                                    NavigationLink(destination: StudyAnalyticsView().environmentObject(dataManager)) {
+                                        Text("See All")
+                                            .font(.custom("Kiwi Maru Light", size: 16))
+                                            .foregroundColor(Color(hex: "#C97D60"))
+                                    }
+                                }
+                                .padding(.leading, 30)
+                                .padding(.trailing, 30)
+                                .padding(.bottom, 10)
+                                
+                                if isLoadingAnalytics {
+                                    HStack {
+                                        Spacer()
+                                        ProgressView()
+                                            .scaleEffect(1.2)
+                                            .padding()
+                                        Spacer()
+                                    }
+                                    .frame(height: 200)
+                                } else if let data = analyticsData {
+                                    studyAnalyticsView(data: data)
+                                } else {
+                                    Text("Empty Analytics")
+                                }
+                            }
+                            
+
+                            
+                            Spacer().frame(height: 30)
+                            
                             VStack(alignment: .leading) {
                                 Text("Achievements")
                                     .font(.custom("Kiwi Maru Light", size: 25))
@@ -209,6 +250,18 @@ struct HomeView: View {
                             }
                         }
                         .padding(.bottom, 50)
+                        .onAppear {
+                            isLoading = true
+                            dataManager.fetchSets()
+                            // Add a small delay to show loading indicator
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                isLoading = false
+                            }
+                            
+                            // Load analytics data
+                            isLoadingAnalytics = true
+                            loadAnalyticsSummary()
+                        }
                     }
                     
                     // Floating header with GeometryReader
@@ -292,6 +345,167 @@ struct HomeView: View {
         .preferredColorScheme(.light)
     }
     
+    
+    
+    
+    
+    private func studyAnalyticsView(data: AnalyticsSummary) -> some View {
+        VStack(spacing: 15) {
+            // Study streak and total time
+            HStack(spacing: 20) {
+                // Streak card
+                VStack(alignment: .center, spacing: 8) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "flame.fill")
+                            .foregroundColor(Color(hex: "#C97D60"))
+                            .font(.system(size: 18))
+                        
+                        Text("Streak")
+                            .font(.custom("Kiwi Maru Light", size: 14))
+                            .foregroundColor(Color.gray)
+                    }
+                    
+                    Text("\(data.currentStreak)")
+                        .font(.custom("Kiwi Maru Medium", size: 28))
+                        .foregroundColor(.black)
+                    
+                    Text("days")
+                        .font(.custom("Kiwi Maru Light", size: 14))
+                        .foregroundColor(Color.gray)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.white)
+                .cornerRadius(15)
+                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
+                
+                // Total study time
+                VStack(alignment: .center, spacing: 8) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "clock.fill")
+                            .foregroundColor(Color(hex: "#C97D60"))
+                            .font(.system(size: 18))
+                        
+                        Text("Study Time")
+                            .font(.custom("Kiwi Maru Light", size: 14))
+                            .foregroundColor(Color.gray)
+                    }
+                    
+                    Text(data.formattedTotalTime)
+                        .font(.custom("Kiwi Maru Medium", size: 28))
+                        .foregroundColor(.black)
+                    
+                    Text("total")
+                        .font(.custom("Kiwi Maru Light", size: 14))
+                        .foregroundColor(Color.gray)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.white)
+                .cornerRadius(15)
+                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
+            }
+            .padding(.horizontal, 30)
+            
+            // Weekly study trend
+            if !data.dailyData.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("This Week")
+                        .font(.custom("Kiwi Maru Light", size: 16))
+                        .foregroundColor(Color.gray)
+                        .padding(.leading, 30)
+                    
+                    HStack(alignment: .bottom, spacing: 8) {
+                        ForEach(data.dailyData) { day in
+                            VStack(spacing: 5) {
+                                // Activity bar
+                                ZStack(alignment: .bottom) {
+                                    // Background bar
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(Color(hex: "#EFEFEF"))
+                                        .frame(width: 25, height: 100)
+                                    
+                                    // Activity bar (scaled to max height of 100)
+                                    if day.minutes > 0 {
+                                        let height = min(100, max(5, day.minutes / data.maxMinutes * 100))
+                                        
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(Color(hex: "#C97D60"))
+                                            .frame(width: 25, height: height)
+                                    }
+                                }
+                                
+                                // Day label
+                                Text(day.shortName)
+                                    .font(.custom("Kiwi Maru Light", size: 12))
+                                    .foregroundColor(Color.gray)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 15)
+                    .padding(.bottom, 5)
+                }
+                .padding(.vertical, 15)
+                .background(Color.white)
+                .cornerRadius(15)
+                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
+                .padding(.horizontal, 30)
+                .padding(.top, 5)
+            }
+        }
+    }
+    
+    // Function to load analytics summary
+    private func loadAnalyticsSummary() {
+        // Get streak information
+        dataManager.getStudyStreak { currentStreak, maxStreak, lastStudyDate in
+            // Get daily study data
+            dataManager.getDailyStudyData(days: 7) { dailyData in
+                // Calculate total study time
+                let totalTime = self.dataManager.sets.reduce(0) { $0 + ($1.totalStudyTime ?? 0) }
+                
+                // Create daily activity data
+                let calendar = Calendar.current
+                let weekdaySymbols = calendar.shortWeekdaySymbols // ["Sun", "Mon", "Tue", ...]
+                
+                var activityData: [DayActivity] = []
+                var maxMinutes: Double = 1 // Avoid division by zero
+                
+                // Process the daily data
+                for item in dailyData {
+                    let minutes = item.minutesStudied
+                    if minutes > maxMinutes {
+                        maxMinutes = minutes
+                    }
+                    
+                    let weekday = calendar.component(.weekday, from: item.date) - 1 // 0-based index
+                    let shortName = weekdaySymbols[weekday]
+                    
+                    activityData.append(DayActivity(
+                        id: shortName,
+                        shortName: shortName,
+                        minutes: minutes
+                    ))
+                }
+                
+                // Create the analytics summary
+                self.analyticsData = AnalyticsSummary(
+                    currentStreak: currentStreak,
+                    maxStreak: maxStreak,
+                    totalStudyTime: totalTime,
+                    formattedTotalTime: formatTimeInterval(totalTime),
+                    dailyData: activityData,
+                    maxMinutes: maxMinutes
+                )
+                
+                self.isLoadingAnalytics = false
+            }
+        }
+    }
+    
+    
+    
+    
     // Empty state view when no sets are available
     private var emptySetView: some View {
         HStack {
@@ -322,7 +536,7 @@ struct HomeView: View {
     }
 }
 
-// Custom Set Tile View for the horizontal scroll
+// Update SetTileView in HomeView.swift or SetsListView.swift
 struct SetTileView: View {
     let set: Set
     
@@ -339,6 +553,13 @@ struct SetTileView: View {
                     .foregroundColor(.white)
                 
                 Spacer()
+                
+                // Add study time indicator if available
+                if let _ = set.totalStudyTime, let totalTime = set.totalStudyTime, totalTime > 0 {
+                    Image(systemName: "clock")
+                        .foregroundColor(.white)
+                        .font(.system(size: 12))
+                }
             }
             .padding(.horizontal, 10)
             .padding(.top, 10)
@@ -352,12 +573,43 @@ struct SetTileView: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
                 .padding(.horizontal, 10)
-                .padding(.bottom, 10)
+            
+            // Add study time if available and greater than zero
+            if let totalTime = set.totalStudyTime, totalTime > 0 {
+                Text(set.formattedStudyTime)
+                    .font(.custom("Kiwi Maru Light", size: 12))
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 5)
+            } else {
+                Spacer().frame(height: 5)
+            }
+            
+            // Bottom padding if no study time
+            if set.totalStudyTime == nil || set.totalStudyTime == 0 {
+                Spacer().frame(height: 10)
+            }
         }
         .frame(width: 160, height: 145)
         .background(Color(hex: "#C97D60"))
         .cornerRadius(15)
     }
+}
+
+// Data models for analytics summary
+struct AnalyticsSummary {
+    let currentStreak: Int
+    let maxStreak: Int
+    let totalStudyTime: TimeInterval
+    let formattedTotalTime: String
+    let dailyData: [DayActivity]
+    let maxMinutes: Double
+}
+
+struct DayActivity: Identifiable {
+    let id: String
+    let shortName: String
+    let minutes: Double
 }
 
 #Preview {
