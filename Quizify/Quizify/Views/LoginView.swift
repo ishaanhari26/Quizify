@@ -196,6 +196,7 @@ struct LoginView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 50, height: 50)
                         .background(Color(hex: "#D9D9D9"))
+                        .modifier(CircularImageModifier())
 
                 }
                     
@@ -237,6 +238,15 @@ extension Color {
 extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))
+    }
+}
+
+
+struct CircularImageModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .clipShape(Circle())
+            .contentShape(Circle())
     }
 }
 

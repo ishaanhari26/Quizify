@@ -303,3 +303,194 @@ extension DataManager {
         }
     }
 }
+
+
+// Add to DataManager.swift
+extension DataManager {
+
+    
+    // Record daily study time
+    func recordDailyStudyTime(date: String, duration: TimeInterval) {
+        let db = Firestore.firestore()
+        let dailyRef = db.collection("DailyStudy").document(date)
+        
+        // First, check if the document exists
+        dailyRef.getDocument { document, error in
+            if let document = document, document.exists, let data = document.data() {
+                // Document exists, update the total time
+                let currentTotalTime = data["totalTime"] as? TimeInterval ?? 0
+                let newTotalTime = currentTotalTime + duration
+                
+                // Update the document with the new total time
+                dailyRef.updateData([
+                    "totalTime": newTotalTime,
+                    "lastUpdated": Timestamp(date: Date())
+                ])
+            } else {
+                // Document doesn't exist, create it
+                let dailyData: [String: Any] = [
+                    "date": date,
+                    "totalTime": duration,
+                    "sessionCount": 1,
+                    "lastUpdated": Timestamp(date: Date())
+                ]
+                
+                dailyRef.setData(dailyData) { error in
+                    if let error = error {
+                        print("Error recording daily study time: \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // Update study streak information
+    func updateStudyStreak(date: String) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users").document(AuthManager.shared.getUserID() ?? "defaultUser")
+        
+        userRef.getDocument { document, error in
+            if let document = document, document.exists, let data = document.data() {
+                // Get current streak data
+                let currentStreak = data["currentStreak"] as? Int ?? 0
+                let lastStudyDate = data["lastStudyDate"] as? String ?? ""
+                let maxStreak = data["maxStreak"] as? Int ?? 0
+                
+                // Check if the streak continues
+                let isStreakContinuation = self.isConsecutiveDay(lastDate: lastStudyDate, currentDate: date)
+                
+                // Calculate the new streak
+                let newStreak: Int
+                if lastStudyDate.isEmpty {
+                    // First time studying
+                    newStreak = 1
+                } else if date == lastStudyDate {
+                    // Same day, no change to streak
+                    newStreak = currentStreak
+                } else if isStreakContinuation {
+                    // Consecutive day, increase streak
+                    newStreak = currentStreak + 1
+                } else {
+                    // Streak broken, start new streak
+                    newStreak = 1
+                }
+                
+                // Update the document with the new streak information
+                let newMaxStreak = max(maxStreak, newStreak)
+                userRef.updateData([
+                    "currentStreak": newStreak,
+                    "lastStudyDate": date,
+                    "maxStreak": newMaxStreak
+                ])
+            } else {
+                // Document doesn't exist, create it
+                let userData: [String: Any] = [
+                    "currentStreak": 1,
+                    "lastStudyDate": date,
+                    "maxStreak": 1
+                ]
+                
+                userRef.setData(userData) { error in
+                    if let error = error {
+                        print("Error updating study streak: \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // Helper function to check if two dates are consecutive days
+    private func isConsecutiveDay(lastDate: String, currentDate: String) -> Bool {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let last = dateFormatter.date(from: lastDate),
+              let current = dateFormatter.date(from: currentDate) else {
+            return false
+        }
+        
+        let calendar = Calendar.current
+        
+        // Get yesterday's date
+        guard let yesterday = calendar.date(byAdding: .day, value: -1, to: current) else {
+            return false
+        }
+        
+        // Check if the last study date was yesterday
+        return calendar.isDate(last, inSameDayAs: yesterday)
+    }
+    
+    // Get user's current study streak
+    func getStudyStreak(completion: @escaping (Int, Int, String) -> Void) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users").document(AuthManager.shared.getUserID() ?? "defaultUser")
+        
+        userRef.getDocument { document, error in
+            if let document = document, document.exists, let data = document.data() {
+                let currentStreak = data["currentStreak"] as? Int ?? 0
+                let maxStreak = data["maxStreak"] as? Int ?? 0
+                let lastStudyDate = data["lastStudyDate"] as? String ?? ""
+                
+                completion(currentStreak, maxStreak, lastStudyDate)
+            } else {
+                completion(0, 0, "")
+            }
+        }
+    }
+    
+    // Get daily study data for the last N days
+    func getDailyStudyData(days: Int, completion: @escaping ([StudyAnalyticsViewModel.DailyStudyData]) -> Void) {
+        let db = Firestore.firestore()
+        let calendar = Calendar.current
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        var dailyData: [StudyAnalyticsViewModel.DailyStudyData] = []
+        let today = Date()
+        
+        // Create a dispatch group to wait for all days to be processed
+        let group = DispatchGroup()
+        
+        for day in 0..<days {
+            if let date = calendar.date(byAdding: .day, value: -day, to: today) {
+                let dateString = dateFormatter.string(from: date)
+                
+                // Enter the dispatch group
+                group.enter()
+                
+                // Fetch study data for this day
+                let dailyRef = db.collection("DailyStudy").document(dateString)
+                dailyRef.getDocument { document, error in
+                    if let document = document, document.exists, let data = document.data() {
+                        if let totalTime = data["totalTime"] as? TimeInterval {
+                            let minutesStudied = totalTime / 60 // Convert to minutes
+                            
+                            let dailyItem = StudyAnalyticsViewModel.DailyStudyData(
+                                date: date,
+                                minutesStudied: minutesStudied
+                            )
+                            
+                            dailyData.append(dailyItem)
+                        }
+                    } else {
+                        // No data for this day, record zero
+                        let dailyItem = StudyAnalyticsViewModel.DailyStudyData(
+                            date: date,
+                            minutesStudied: 0
+                        )
+                        
+                        dailyData.append(dailyItem)
+                    }
+                    
+                    group.leave()
+                }
+            }
+        }
+        
+        // When all days have been processed, sort and return the data
+        group.notify(queue: .main) {
+            let sortedData = dailyData.sorted(by: { $0.date < $1.date })
+            completion(sortedData)
+        }
+    }
+}

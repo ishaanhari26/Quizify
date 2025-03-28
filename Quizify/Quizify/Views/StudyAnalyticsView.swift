@@ -226,6 +226,7 @@ struct StudyAnalyticsView: View {
         }
     }
     
+    // Update in StudyAnalyticsView.swift
     private var studyHabitsSection: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Study Habits")
@@ -276,9 +277,27 @@ struct StudyAnalyticsView: View {
                             .font(.custom("Kiwi Maru Regular", size: 16))
                             .foregroundColor(.black)
                         
-                        Text(viewModel.currentStreak)
+                        Text(viewModel.formattedCurrentStreak)
                             .font(.custom("Kiwi Maru Light", size: 14))
                             .foregroundColor(.gray)
+                    }
+                }
+                
+                if viewModel.maxStreak > 0 {
+                    HStack(alignment: .top) {
+                        Image(systemName: "trophy.fill")
+                            .foregroundColor(Color(hex: "#C97D60"))
+                            .font(.system(size: 18))
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Best Streak")
+                                .font(.custom("Kiwi Maru Regular", size: 16))
+                                .foregroundColor(.black)
+                            
+                            Text("\(viewModel.maxStreak) days")
+                                .font(.custom("Kiwi Maru Light", size: 14))
+                                .foregroundColor(.gray)
+                        }
                     }
                 }
             }
@@ -345,7 +364,8 @@ struct StudyAnalyticsView: View {
     }
 }
 
-// View Model for Analytics
+
+// StudyAnalyticsViewModel.swift - Updated
 class StudyAnalyticsViewModel: ObservableObject {
     @Published var isLoading = true
     @Published var totalStudyTime: TimeInterval = 0
@@ -354,6 +374,11 @@ class StudyAnalyticsViewModel: ObservableObject {
     @Published var dailyStudyData: [DailyStudyData] = []
     @Published var topSets: [Set] = []
     @Published var maxDailyMinutes: Double = 60 // Default max for chart
+    
+    // Streak information
+    @Published var currentStreak: Int = 0
+    @Published var maxStreak: Int = 0
+    @Published var lastStudyDate: String = ""
     
     // Formatted strings for display
     var formattedTotalStudyTime: String {
@@ -382,10 +407,14 @@ class StudyAnalyticsViewModel: ObservableObject {
         return "No data yet"
     }
     
-    var currentStreak: String {
-        // This would require more complex logic and date tracking
-        // For now, return a placeholder
-        return "Current streak: 0 days"
+    var formattedCurrentStreak: String {
+        if currentStreak == 0 {
+            return "No active streak"
+        } else if currentStreak == 1 {
+            return "Current streak: 1 day"
+        } else {
+            return "Current streak: \(currentStreak) days"
+        }
     }
     
     // Models for charts
@@ -413,9 +442,6 @@ class StudyAnalyticsViewModel: ObservableObject {
     func loadAnalytics(dataManager: DataManager) {
         isLoading = true
         
-        // This would typically be fetched from Firestore
-        // For now, we'll generate sample data based on the sets
-        
         // 1. Get all sets from DataManager
         let studiedSets = dataManager.sets.filter { $0.totalStudyTime != nil && $0.totalStudyTime! > 0 }
         
@@ -435,43 +461,29 @@ class StudyAnalyticsViewModel: ObservableObject {
         }
         .sorted(by: { $0.studyTime > $1.studyTime })
         
-        // 5. Create daily study data (sample data for now)
-        generateSampleDailyData()
-        
-        // 6. Get top sets
+        // 5. Get top sets
         topSets = Array(studiedSets.sorted(by: { ($0.totalStudyTime ?? 0) > ($1.totalStudyTime ?? 0) }).prefix(3))
         
-        isLoading = false
-    }
-    
-    // Generate sample daily data for the chart
-    private func generateSampleDailyData() {
-        let calendar = Calendar.current
-        let today = Date()
-        
-        // Create data for the last 7 days
-        var dailyData: [DailyStudyData] = []
-        var maxMinutes = 0.0
-        
-        for day in 0..<7 {
-            if let date = calendar.date(byAdding: .day, value: -day, to: today) {
-                // Generate random study time between 0 and 120 minutes
-                // In a real app, this would come from Firestore
-                let minutes = Double.random(in: 0...120)
-                if minutes > maxMinutes {
-                    maxMinutes = minutes
-                }
-                
-                dailyData.append(DailyStudyData(
-                    date: date,
-                    minutesStudied: minutes
-                ))
+        // 6. Get daily study data for the last 7 days
+        dataManager.getDailyStudyData(days: 7) { [weak self] data in
+            guard let self = self else { return }
+            self.dailyStudyData = data
+            
+            // Find the maximum daily minutes for chart scaling
+            if let maxDaily = data.max(by: { $0.minutesStudied < $1.minutesStudied }) {
+                self.maxDailyMinutes = max(60, maxDaily.minutesStudied + 10) // Add padding
             }
         }
         
-        // Sort by date
-        dailyStudyData = dailyData.sorted(by: { $0.date < $1.date })
-        maxDailyMinutes = maxMinutes
+        // 7. Get streak information
+        dataManager.getStudyStreak { [weak self] currentStreak, maxStreak, lastStudyDate in
+            guard let self = self else { return }
+            self.currentStreak = currentStreak
+            self.maxStreak = maxStreak
+            self.lastStudyDate = lastStudyDate
+            
+            self.isLoading = false
+        }
     }
 }
 

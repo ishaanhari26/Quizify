@@ -192,3 +192,10 @@ extension AuthManager {
         return try await startTwoFactorAuthentication(phoneNumber: phoneNumber)
     }
 }
+
+// Add to AuthManager.swift
+extension AuthManager {
+    func getUserID() -> String? {
+        return Auth.auth().currentUser?.uid
+    }
+}

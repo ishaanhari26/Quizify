@@ -9,11 +9,13 @@ import SwiftUI
 import FirebaseAuth
 
 struct ProfileView: View {
+    @EnvironmentObject var dataManager: DataManager
     @State private var userEmail: String = ""
     @State private var is2FAEnabled: Bool = false
     @State private var showTwoFactorSettings = false
     @State private var isLoading = true
     @Environment(\.dismiss) var dismiss
+    @State private var studyStreak: Int = 0
     
     var body: some View {
         ZStack {
@@ -74,22 +76,63 @@ struct ProfileView: View {
                                 )
                                 .padding(.top, 30)
                             
-                            // User info
+                            
                             VStack(spacing: 5) {
+                                // Existing user email display
                                 Text(userEmail)
                                     .font(.custom("Kiwi Maru Regular", size: 18))
                                     .foregroundColor(.black)
                                 
                                 HStack {
-                                    Image(systemName: is2FAEnabled ? "checkmark.shield.fill" : "shield")
-                                        .foregroundColor(is2FAEnabled ? .green : .gray)
-                                        .font(.system(size: 16))
+                                    // 2FA status (existing)
+                                    HStack {
+                                        Image(systemName: is2FAEnabled ? "checkmark.shield.fill" : "shield")
+                                            .foregroundColor(is2FAEnabled ? .green : .gray)
+                                            .font(.system(size: 16))
+                                        
+                                        Text(is2FAEnabled ? "2FA Enabled" : "2FA Disabled")
+                                            .font(.custom("Kiwi Maru Light", size: 14))
+                                            .foregroundColor(is2FAEnabled ? .green : .gray)
+                                    }
                                     
-                                    Text(is2FAEnabled ? "2FA Enabled" : "2FA Disabled")
-                                        .font(.custom("Kiwi Maru Light", size: 14))
-                                        .foregroundColor(is2FAEnabled ? .green : .gray)
+                                    // Add streak badge if streak > 0
+                                    if studyStreak > 0 {
+                                        Spacer().frame(width: 10)
+                                        
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "flame.fill")
+                                                .foregroundColor(Color(hex: "#C97D60"))
+                                                .font(.system(size: 16))
+                                            
+                                            Text("\(studyStreak)")
+                                                .font(.custom("Kiwi Maru Medium", size: 14))
+                                                .foregroundColor(Color(hex: "#C97D60"))
+                                        }
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color(hex: "#C97D60").opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
                                 }
                                 .padding(.top, 5)
+                            }
+                            
+                            // In onAppear, add this to fetch streak information
+                            .onAppear {
+                                isLoading = true
+                                
+                                // Get user info
+                                if let user = Auth.auth().currentUser {
+                                    userEmail = user.email ?? "No email"
+                                    is2FAEnabled = user.phoneNumber != nil
+                                }
+                                
+                                // Get study streak
+                                dataManager.getStudyStreak { currentStreak, _, _ in
+                                    self.studyStreak = currentStreak
+                                }
+                                
+                                isLoading = false
                             }
                             
                             // Divider
