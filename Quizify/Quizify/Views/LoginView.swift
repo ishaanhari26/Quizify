@@ -28,6 +28,8 @@ final class LoginEmailViewModel : ObservableObject {
     @Published var errorMessage = ""
     @Published var shouldShowTwoFactor = false
     @Published var isTwoFactorEnabled = false
+    @Published var shouldShowOnboarding = false
+    @Published var isNewUser = false
     
     init() {
         
@@ -41,6 +43,9 @@ final class LoginEmailViewModel : ObservableObject {
         
         do {
             let returnedUserData = try await AuthManager.shared.loginUser(email: email, password: password)
+            
+            // Check if user has completed onboarding
+            await checkOnboardingStatus(userID: returnedUserData.uid)
             
             // Check if 2FA is enabled for this user
             if AuthManager.shared.isPhoneNumberVerified() {
@@ -61,40 +66,6 @@ final class LoginEmailViewModel : ObservableObject {
             errorMessage = error.localizedDescription
             print("Error: \(error)")
         }
-        
-        if isAuthenticated {
-            // Ensure the user has a username and display name
-            let userID = AuthManager.shared.getUserID() ?? ""
-            if !userID.isEmpty {
-                let db = Firestore.firestore()
-                let userRef = db.collection("Users").document(userID)
-                
-                userRef.getDocument { document, error in
-                    // Check if the user document exists
-                    if document == nil || !document!.exists {
-                        // User logged in but doesn't have a Firestore record, create one
-                        let email = Auth.auth().currentUser?.email ?? ""
-                        let generatedUsername = email.components(separatedBy: "@").first?.lowercased() ?? "user"
-                        
-                        let userData: [String: Any] = [
-                            "email": email,
-                            "username": generatedUsername,
-                            "displayName": generatedUsername.capitalized,
-                            "setCount": 0,
-                            "currentStreak": 0,
-                            "maxStreak": 0,
-                            "createdAt": Timestamp(date: Date()),
-                            "updatedAt": Timestamp(date: Date())
-                        ]
-                        
-                        userRef.setData(userData) { _ in
-                            // Proceed with login flow
-                        }
-                    }
-                }
-            }
-        }
-        
     }
     
     func googleAuth() async throws {
@@ -115,6 +86,11 @@ final class LoginEmailViewModel : ObservableObject {
         do {
             try await AuthManager.shared.signInWithGoogle(tokens: tokens)
             
+            // Check if user has completed onboarding
+            if let userID = AuthManager.shared.getUserID() {
+                await checkOnboardingStatus(userID: userID)
+            }
+            
             // Check if 2FA is enabled for this user
             if AuthManager.shared.isPhoneNumberVerified() {
                 // User has already verified their phone number
@@ -132,44 +108,38 @@ final class LoginEmailViewModel : ObservableObject {
             errorMessage = error.localizedDescription
             print("Error: \(error)")
         }
+    }
+    
+    // Check if the user has completed onboarding
+    func checkOnboardingStatus(userID: String) async {
+        let db = Firestore.firestore()
         
-        
-        if isAuthenticated {
-            // Ensure the user has a username and display name
-            let userID = AuthManager.shared.getUserID() ?? ""
-            if !userID.isEmpty {
-                let db = Firestore.firestore()
-                let userRef = db.collection("Users").document(userID)
+        do {
+            let document = try await db.collection("Users").document(userID).getDocument()
+            
+            // Check if user data exists and contains onboarding fields
+            if let data = document.data(),
+               let displayName = data["displayName"] as? String,
+               !displayName.isEmpty,
+               let username = data["username"] as? String,
+               !username.isEmpty {
                 
-                userRef.getDocument { document, error in
-                    // Check if the user document exists
-                    if document == nil || !document!.exists {
-                        // User logged in with Google but doesn't have a Firestore record, create one
-                        let email = Auth.auth().currentUser?.email ?? ""
-                        let displayName = Auth.auth().currentUser?.displayName ?? ""
-                        let generatedUsername = email.components(separatedBy: "@").first?.lowercased() ?? "user"
-                        
-                        let userData: [String: Any] = [
-                            "email": email,
-                            "username": generatedUsername,
-                            "displayName": displayName.isEmpty ? generatedUsername.capitalized : displayName,
-                            "setCount": 0,
-                            "currentStreak": 0,
-                            "maxStreak": 0,
-                            "createdAt": Timestamp(date: Date()),
-                            "updatedAt": Timestamp(date: Date())
-                        ]
-                        
-                        userRef.setData(userData) { _ in
-                            // Proceed with login flow
-                        }
-                    }
-                }
+                // User has already completed onboarding
+                isNewUser = false
+            } else {
+                // User needs to complete onboarding
+                isNewUser = true
+                shouldShowOnboarding = true
             }
+        } catch {
+            // If there's an error, assume user needs onboarding
+            isNewUser = true
+            shouldShowOnboarding = true
+            print("Error checking onboarding status: \(error.localizedDescription)")
         }
-        
     }
 }
+
 struct LoginView: View {
     
     @StateObject private var viewModel = LoginEmailViewModel()
@@ -179,6 +149,7 @@ struct LoginView: View {
     @FocusState private var isPasswordFocused: Bool
     @State private var navigateToHome = false
     @State private var showTwoFactorSetup = false
+    @State private var showOnboarding = false
     @Binding var goToHome: Bool
     
     var body: some View {
@@ -246,7 +217,10 @@ struct LoginView: View {
                         await viewModel.logIn()
                         
                         if viewModel.isAuthenticated {
-                            if viewModel.shouldShowTwoFactor {
+                            if viewModel.shouldShowOnboarding {
+                                // Show onboarding if user is new or hasn't completed onboarding
+                                showOnboarding = true
+                            } else if viewModel.shouldShowTwoFactor {
                                 // Show 2FA setup
                                 showTwoFactorSetup = true
                             } else if viewModel.isTwoFactorEnabled {
@@ -291,7 +265,10 @@ struct LoginView: View {
                         try await viewModel.googleAuth()
                         
                         if viewModel.isAuthenticated {
-                            if viewModel.shouldShowTwoFactor {
+                            if viewModel.shouldShowOnboarding {
+                                // Show onboarding if user is new or hasn't completed onboarding
+                                showOnboarding = true
+                            } else if viewModel.shouldShowTwoFactor {
                                 // Show 2FA setup
                                 showTwoFactorSetup = true
                             } else if viewModel.isTwoFactorEnabled {
@@ -328,7 +305,10 @@ struct LoginView: View {
         .ignoresSafeArea(.keyboard)
         .frame(maxHeight: 650)
         .fullScreenCover(isPresented: $showTwoFactorSetup) {
-            PhoneNumberEntryView(goToHome: $goToHome)
+            PhoneNumberEntryView(goToHome: $goToHome, showOnboarding: $showOnboarding)
+        }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView(goToHome: $goToHome)
         }
     }
 }
@@ -364,7 +344,6 @@ struct CircularImageModifier: ViewModifier {
             .contentShape(Circle())
     }
 }
-
 
 struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
