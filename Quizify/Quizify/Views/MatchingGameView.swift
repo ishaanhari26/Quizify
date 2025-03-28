@@ -110,7 +110,7 @@ struct MatchingGameView: View {
         VStack(spacing: 20) {
             // Game info bar
             HStack {
-                // Score
+                // score
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Set: \(viewModel.setTitle)")
                         .font(.custom("Kiwi Maru Regular", size: 14))
@@ -123,7 +123,7 @@ struct MatchingGameView: View {
                 
                 Spacer()
                 
-                // Timer
+                // timer
                 VStack(alignment: .trailing, spacing: 5) {
                     Text("Time Remaining")
                         .font(.custom("Kiwi Maru Regular", size: 14))
@@ -260,7 +260,6 @@ struct MatchingCardView: View {
     
     var body: some View {
         ZStack {
-            // Card always shows content since we start with all cards showing
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white)
                 .overlay(
@@ -300,7 +299,7 @@ struct MatchingCardView: View {
         .disabled(card.isMatched)
     }
     
-    // Helper methods to determine colors based on card state
+    // color based on card state
     private func cardBorderColor() -> Color {
         if card.isMatched {
             return Color.green

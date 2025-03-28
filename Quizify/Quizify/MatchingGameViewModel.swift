@@ -16,7 +16,7 @@ struct MatchingCard: Identifiable {
     let isTermCard: Bool  // true if term, false if definition
     var isFlipped = true  // Start with cards flipped (showing content)
     var isMatched = false
-    var isIncorrect = false  // New property to track incorrect selections
+    var isIncorrect = false  // track incorrect selections
 }
 
 @MainActor
