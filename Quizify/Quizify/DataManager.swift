@@ -348,7 +348,16 @@ extension DataManager {
     // Record daily study time
     func recordDailyStudyTime(date: String, duration: TimeInterval) {
         let db = Firestore.firestore()
-        let dailyRef = db.collection("DailyStudy").document(date)
+        
+        // Get the current user ID, if available
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot record daily study time: No user is signed in")
+            return
+        }
+        
+        // Create a document ID that combines the user ID and date
+        let documentID = "\(userID)_\(date)"
+        let dailyRef = db.collection("DailyStudy").document(documentID)
         
         // First, check if the document exists
         dailyRef.getDocument { document, error in
@@ -365,6 +374,7 @@ extension DataManager {
             } else {
                 // Document doesn't exist, create it
                 let dailyData: [String: Any] = [
+                    "userID": userID,
                     "date": date,
                     "totalTime": duration,
                     "sessionCount": 1,
@@ -383,7 +393,15 @@ extension DataManager {
     // Update study streak information
     func updateStudyStreak(date: String) {
         let db = Firestore.firestore()
-        let userRef = db.collection("Users").document(AuthManager.shared.getUserID() ?? "defaultUser")
+        
+        // Get the current user ID
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot update streak: No user is signed in")
+            return
+        }
+        
+        // Reference to the user document
+        let userRef = db.collection("Users").document(userID)
         
         userRef.getDocument { document, error in
             if let document = document, document.exists, let data = document.data() {
@@ -459,7 +477,15 @@ extension DataManager {
     // Get user's current study streak
     func getStudyStreak(completion: @escaping (Int, Int, String) -> Void) {
         let db = Firestore.firestore()
-        let userRef = db.collection("Users").document(AuthManager.shared.getUserID() ?? "defaultUser")
+        
+        // Get the current user ID
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot get streak: No user is signed in")
+            completion(0, 0, "")
+            return
+        }
+        
+        let userRef = db.collection("Users").document(userID)
         
         userRef.getDocument { document, error in
             if let document = document, document.exists, let data = document.data() {
@@ -481,6 +507,13 @@ extension DataManager {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
+        // Get the current user ID
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot get daily study data: No user is signed in")
+            completion([])
+            return
+        }
+        
         var dailyData: [StudyAnalyticsViewModel.DailyStudyData] = []
         let today = Date()
         
@@ -494,8 +527,11 @@ extension DataManager {
                 // Enter the dispatch group
                 group.enter()
                 
+                // The document ID is a combination of user ID and date
+                let documentID = "\(userID)_\(dateString)"
+                
                 // Fetch study data for this day
-                let dailyRef = db.collection("DailyStudy").document(dateString)
+                let dailyRef = db.collection("DailyStudy").document(documentID)
                 dailyRef.getDocument { document, error in
                     if let document = document, document.exists, let data = document.data() {
                         if let totalTime = data["totalTime"] as? TimeInterval {
