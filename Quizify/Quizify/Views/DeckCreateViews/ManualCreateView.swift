@@ -291,6 +291,14 @@ struct ManualCreateView: View {
             isPublic: isPublic
         )
         
+        // Update achievements for creating a new set
+        dataManager.updateAchievementsForNewSet(cardCount: cards.count)
+        
+        // If the set is public, update public set achievements
+        if isPublic {
+            dataManager.updateAchievementsForPublicSet()
+        }
+        
         // Wait a moment before dismissing to allow Firebase operation to complete
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             isCreatingSet = false

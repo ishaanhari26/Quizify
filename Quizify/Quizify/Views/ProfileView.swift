@@ -270,6 +270,7 @@ struct ProfileView: View {
         }
         .navigationDestination(isPresented: $showTwoFactorSettings) {
             TwoFactorSettingsView()
+                .navigationBarBackButtonHidden()
         }
     }
 }

@@ -587,6 +587,11 @@ struct OnboardingView: View {
                 // is not properly linked, we'll skip that step for now
                 print("Profile saved successfully, but profile image upload skipped.")
                 
+                // Update achievement for completing profile
+                if self.dataManager != nil {
+                    self.dataManager.updateAchievementForProfileCompletion()
+                }
+                
                 // Navigate to home screen
                 self.goToHome = true
                 self.dismissParent = true // This will trigger the parent view to dismiss

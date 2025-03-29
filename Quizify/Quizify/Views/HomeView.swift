@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+import FirebaseCore
+import FirebaseFirestore
+import FirebaseAuth
+
 @MainActor
 final class SettingsViewModel : ObservableObject {
     func logOut() throws {
@@ -253,22 +257,12 @@ struct HomeView: View {
                             Spacer().frame(height: 30)
                             
                             VStack(alignment: .leading) {
-                                Text("Achievements")
-                                    .font(.custom("Kiwi Maru Light", size: 25))
-                                    .foregroundColor(Color(.gray))
-                                    .padding(.leading, 30)
                                 
-                                // Placeholder for achievements section
-                                HStack {
-                                    Spacer()
-                                    Text("Coming soon!")
-                                        .font(.custom("Kiwi Maru Light", size: 18))
-                                        .foregroundColor(Color(.gray))
-                                        .padding()
-                                    Spacer()
-                                }
-                                .frame(height: 150)
+
+                                AchievementsSectionView()
+                                    .navigationBarBackButtonHidden()
                             }
+
                             
                             
                         }

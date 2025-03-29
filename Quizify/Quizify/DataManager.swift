@@ -919,3 +919,156 @@ extension DataManager {
         }
     }
 }
+
+
+
+extension DataManager {
+    // Update achievements when a set is created
+    func updateAchievementsForNewSet(cardCount: Int) {
+        guard let userID = AuthManager.shared.getUserID() else { return }
+        
+        let db = Firestore.firestore()
+        
+        // Get the user's current set count
+        db.collection("Users").document(userID).getDocument { document, error in
+            if let document = document, document.exists, let data = document.data() {
+                let setCount = data["setCount"] as? Int ?? 0
+                
+                // Update creation achievements
+                AchievementsManager.shared.checkSetCreationAchievements(setCount: setCount)
+                
+                // Update card count achievement
+                self.getTotalCardCount { totalCardCount in
+                    AchievementsManager.shared.checkCardCreationAchievement(totalCards: totalCardCount + cardCount)
+                }
+            }
+        }
+    }
+    
+    // Update achievements when a set is made public
+    func updateAchievementsForPublicSet() {
+        guard let userID = AuthManager.shared.getUserID() else { return }
+        
+        let db = Firestore.firestore()
+        
+        // Count public sets by this user
+        db.collection("Sets")
+            .whereField("userID", isEqualTo: userID)
+            .whereField("isPublic", isEqualTo: true)
+            .getDocuments { snapshot, error in
+                if let snapshot = snapshot {
+                    let publicSetCount = snapshot.documents.count
+                    AchievementsManager.shared.checkPublicSetAchievements(publicSetCount: publicSetCount)
+                }
+            }
+    }
+    
+    // Update achievements after completing a study session
+    func updateAchievementsForStudySession(setID: String, duration: TimeInterval) {
+        // Convert duration to minutes for achievement tracking
+        let studyMinutes = Int(duration / 60)
+        
+        // Get total study time
+        calculateTotalStudyTime { totalMinutes in
+            AchievementsManager.shared.checkStudyTimeAchievements(minutes: totalMinutes)
+        }
+        
+        // Check for streak achievements
+        getStudyStreak { currentStreak, maxStreak, _ in
+            AchievementsManager.shared.checkStreakAchievements(currentStreak: currentStreak)
+        }
+        
+        // Update diverse learner achievement (unique sets studied)
+        getUniqueStudiedSetsCount { uniqueSetCount in
+            AchievementsManager.shared.checkDiverseLearnerAchievement(uniqueSetCount: uniqueSetCount)
+        }
+    }
+    
+    // Calculate total study time across all sets
+    private func calculateTotalStudyTime(completion: @escaping (Int) -> Void) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(0)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("StudyTimes")
+            .whereField("userID", isEqualTo: userID)
+            .getDocuments { snapshot, error in
+                var totalTime: TimeInterval = 0
+                
+                if let snapshot = snapshot {
+                    for document in snapshot.documents {
+                        if let duration = document.data()["duration"] as? TimeInterval {
+                            totalTime += duration
+                        }
+                    }
+                }
+                
+                // Convert to minutes
+                let totalMinutes = Int(totalTime / 60)
+                completion(totalMinutes)
+            }
+    }
+    
+    // Get the total number of unique sets studied
+    private func getUniqueStudiedSetsCount(completion: @escaping (Int) -> Void) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(0)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("StudyTimes")
+            .whereField("userID", isEqualTo: userID)
+            .getDocuments { snapshot, error in
+                if let snapshot = snapshot {
+                    // Get unique set IDs using a dictionary for uniqueness
+                    var uniqueSetIDs = [String: Bool]()
+                    for document in snapshot.documents {
+                        if let setID = document.data()["setID"] as? String {
+                            uniqueSetIDs[setID] = true
+                        }
+                    }
+                    completion(uniqueSetIDs.count)
+                } else {
+                    completion(0)
+                }
+            }
+    }
+    
+    // Get the total card count created by the user
+    private func getTotalCardCount(completion: @escaping (Int) -> Void) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(0)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("Sets")
+            .whereField("userID", isEqualTo: userID)
+            .getDocuments { snapshot, error in
+                var totalCards = 0
+                
+                if let snapshot = snapshot {
+                    for document in snapshot.documents {
+                        if let cardCount = document.data()["cardCount"] as? Int {
+                            totalCards += cardCount
+                        }
+                    }
+                }
+                
+                completion(totalCards)
+            }
+    }
+    
+    // Update achievements after completing a matching game
+    func updateAchievementsForMatchingGame(timeUsed: TimeInterval) {
+        AchievementsManager.shared.checkMatchingGameAchievement(timeUsed: timeUsed)
+    }
+    
+    // Update achievement when profile is completed
+    func updateAchievementForProfileCompletion() {
+        AchievementsManager.shared.checkProfileCompletionAchievement(isComplete: true)
+    }
+}
