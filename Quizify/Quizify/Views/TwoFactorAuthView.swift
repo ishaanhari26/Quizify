@@ -75,10 +75,12 @@ struct TwoFactorAuthView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: TwoFactorAuthViewModel
     @Binding var goToHome: Bool
+    @Binding var showOnboarding: Bool
     
-    init(verificationID: String, goToHome: Binding<Bool> = .constant(false)) {
+    init(verificationID: String, goToHome: Binding<Bool> = .constant(false), showOnboarding: Binding<Bool> = .constant(false)) {
         _viewModel = StateObject(wrappedValue: TwoFactorAuthViewModel(verificationID: verificationID))
         _goToHome = goToHome
+        _showOnboarding = showOnboarding
     }
     
     var body: some View {
@@ -124,8 +126,18 @@ struct TwoFactorAuthView: View {
                         await viewModel.verifyCode()
                         
                         if viewModel.isVerified {
-                            goToHome = true
-                            dismiss()
+                            // Check if profile exists before routing
+                            Task {
+                                if await AuthManager.shared.userHasCompletedProfile() {
+                                    // If user has profile, go to home
+                                    goToHome = true
+                                    dismiss()
+                                } else {
+                                    // Otherwise, go to onboarding
+                                    showOnboarding = true
+                                    dismiss()
+                                }
+                            }
                         }
                     }
                 }) {
@@ -173,8 +185,12 @@ struct TwoFactorAuthView: View {
     }
 }
 
+
+
 struct TwoFactorAuthView_Previews: PreviewProvider {
     static var previews: some View {
-        TwoFactorAuthView(verificationID: "preview-verification-id")
+        TwoFactorAuthView(verificationID: "preview-verification-id",
+                          goToHome: .constant(false),
+                          showOnboarding: .constant(false))
     }
 }

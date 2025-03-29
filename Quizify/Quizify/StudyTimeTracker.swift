@@ -50,6 +50,9 @@ class StudyTimeTracker: ObservableObject {
         // Update streak information
         dataManager.updateStudyStreak(date: currentDay)
         
+        // Update achievements for this study session
+        dataManager.updateAchievementsForStudySession(setID: setID, duration: totalTime)
+        
         // Reset state
         timer?.invalidate()
         timer = nil

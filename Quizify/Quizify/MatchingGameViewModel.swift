@@ -197,8 +197,12 @@ class MatchingGameViewModel: ObservableObject {
                 // Calculate time used
                 if let startTime = startTime {
                     timeUsed = Date().timeIntervalSince(startTime)
+                    
+                    // Track achievement for completing the game quickly
+                    DataManager().updateAchievementsForMatchingGame(timeUsed: timeUsed)
                 }
             }
+
             
             // Reset selection state
             resetSelection()

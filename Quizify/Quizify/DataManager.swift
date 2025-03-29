@@ -8,6 +8,7 @@
 import Foundation
 import Firebase
 import FirebaseFirestore
+import FirebaseAuth
 
 // Update in DataManager.swift
 struct Set: Identifiable {
@@ -71,12 +72,19 @@ class DataManager: ObservableObject {
             }
         }
     }
-    // Update in DataManager.swift
     func fetchSets() {
         sets.removeAll()
         let db = Firestore.firestore()
         let ref = db.collection("Sets")
-        ref.getDocuments { snapshot, error in
+        
+        // Get the current user ID, if available
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("No user is signed in")
+            return
+        }
+        
+        // Query only the sets created by the current user
+        ref.whereField("userID", isEqualTo: userID).getDocuments { snapshot, error in
             guard error == nil else {
                 print(error!.localizedDescription)
                 return
@@ -127,51 +135,9 @@ class DataManager: ObservableObject {
         }
     }
     
-    // Add a new set and its cards to Firestore
-    func addSet(title: String, description: String?, cards: [FlashCard]) {
-        let db = Firestore.firestore()
-        
-        // Create a new document in the Sets collection
-        let setRef = db.collection("Sets").document()
-        let setID = setRef.documentID
-        
-        // Set data for the new set
-        let setData: [String: Any] = [
-            "title": title,
-            "description": description ?? "",
-            "cardCount": cards.count,
-            "createdAt": Timestamp(date: Date())
-        ]
-        
-        // Create the set document
-        setRef.setData(setData) { error in
-            if let error = error {
-                print("Error creating set: \(error.localizedDescription)")
-                return
-            }
-            
-            // After creating the set, add each card to the Cards subcollection
-            for (index, card) in cards.enumerated() {
-                let cardRef = setRef.collection("Cards").document()
-                
-                let cardData: [String: Any] = [
-                    "term": card.term,
-                    "definition": card.definition,
-                    "position": index,
-                    "createdAt": Timestamp(date: Date())
-                ]
-                
-                cardRef.setData(cardData) { error in
-                    if let error = error {
-                        print("Error adding card: \(error.localizedDescription)")
-                    }
-                }
-            }
-            
-            // Refresh the sets list after adding
-            self.fetchSets()
-        }
-    }
+    
+    
+    // Add this function to the DataManager class if it's missing or needs updating
     
     // Fetch all cards for a specific set
     func fetchCardsForSet(setID: String, completion: @escaping ([Card]) -> Void) {
@@ -202,6 +168,59 @@ class DataManager: ObservableObject {
             } else {
                 completion([])
             }
+        }
+    }
+    
+    // Add a new set and its cards to Firestore
+    func addSet(title: String, description: String?, cards: [FlashCard]) {
+        let db = Firestore.firestore()
+        
+        // Get the current user ID, if available
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot create set: No user is signed in")
+            return
+        }
+        
+        // Create a new document in the Sets collection
+        let setRef = db.collection("Sets").document()
+        let setID = setRef.documentID
+        
+        // Include the userID in the set data
+        let setData: [String: Any] = [
+            "title": title,
+            "description": description ?? "",
+            "cardCount": cards.count,
+            "createdAt": Timestamp(date: Date()),
+            "userID": userID  // Add the user ID to associate the set with the user
+        ]
+        
+        // Create the set document
+        setRef.setData(setData) { error in
+            if let error = error {
+                print("Error creating set: \(error.localizedDescription)")
+                return
+            }
+            
+            // After creating the set, add each card to the Cards subcollection
+            for (index, card) in cards.enumerated() {
+                let cardRef = setRef.collection("Cards").document()
+                
+                let cardData: [String: Any] = [
+                    "term": card.term,
+                    "definition": card.definition,
+                    "position": index,
+                    "createdAt": Timestamp(date: Date())
+                ]
+                
+                cardRef.setData(cardData) { error in
+                    if let error = error {
+                        print("Error adding card: \(error.localizedDescription)")
+                    }
+                }
+            }
+            
+            // Refresh the sets list after adding
+            self.fetchSets()
         }
     }
     
@@ -260,8 +279,15 @@ extension DataManager {
         let db = Firestore.firestore()
         let studyTimeRef = db.collection("StudyTimes").document()
         
+        // Get the current user ID, if available
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot record study time: No user is signed in")
+            return
+        }
+        
         let studyData: [String: Any] = [
             "setID": setID,
+            "userID": userID,  // Include the user ID
             "duration": duration,
             "timestamp": Timestamp(date: Date())
         ]
@@ -276,7 +302,18 @@ extension DataManager {
     // Get total study time for a set
     func getTotalStudyTime(setID: String, completion: @escaping (TimeInterval) -> Void) {
         let db = Firestore.firestore()
-        let studyTimesRef = db.collection("StudyTimes").whereField("setID", isEqualTo: setID)
+        
+        // Get the current user ID, if available
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot get study time: No user is signed in")
+            completion(0)
+            return
+        }
+        
+        // Query only study times for the current user
+        let studyTimesRef = db.collection("StudyTimes")
+            .whereField("setID", isEqualTo: setID)
+            .whereField("userID", isEqualTo: userID)
         
         studyTimesRef.getDocuments { snapshot, error in
             guard error == nil else {
@@ -312,7 +349,16 @@ extension DataManager {
     // Record daily study time
     func recordDailyStudyTime(date: String, duration: TimeInterval) {
         let db = Firestore.firestore()
-        let dailyRef = db.collection("DailyStudy").document(date)
+        
+        // Get the current user ID, if available
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot record daily study time: No user is signed in")
+            return
+        }
+        
+        // Create a document ID that combines the user ID and date
+        let documentID = "\(userID)_\(date)"
+        let dailyRef = db.collection("DailyStudy").document(documentID)
         
         // First, check if the document exists
         dailyRef.getDocument { document, error in
@@ -329,6 +375,7 @@ extension DataManager {
             } else {
                 // Document doesn't exist, create it
                 let dailyData: [String: Any] = [
+                    "userID": userID,
                     "date": date,
                     "totalTime": duration,
                     "sessionCount": 1,
@@ -347,7 +394,15 @@ extension DataManager {
     // Update study streak information
     func updateStudyStreak(date: String) {
         let db = Firestore.firestore()
-        let userRef = db.collection("Users").document(AuthManager.shared.getUserID() ?? "defaultUser")
+        
+        // Get the current user ID
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot update streak: No user is signed in")
+            return
+        }
+        
+        // Reference to the user document
+        let userRef = db.collection("Users").document(userID)
         
         userRef.getDocument { document, error in
             if let document = document, document.exists, let data = document.data() {
@@ -423,7 +478,15 @@ extension DataManager {
     // Get user's current study streak
     func getStudyStreak(completion: @escaping (Int, Int, String) -> Void) {
         let db = Firestore.firestore()
-        let userRef = db.collection("Users").document(AuthManager.shared.getUserID() ?? "defaultUser")
+        
+        // Get the current user ID
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot get streak: No user is signed in")
+            completion(0, 0, "")
+            return
+        }
+        
+        let userRef = db.collection("Users").document(userID)
         
         userRef.getDocument { document, error in
             if let document = document, document.exists, let data = document.data() {
@@ -445,6 +508,13 @@ extension DataManager {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
+        // Get the current user ID
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot get daily study data: No user is signed in")
+            completion([])
+            return
+        }
+        
         var dailyData: [StudyAnalyticsViewModel.DailyStudyData] = []
         let today = Date()
         
@@ -458,8 +528,11 @@ extension DataManager {
                 // Enter the dispatch group
                 group.enter()
                 
+                // The document ID is a combination of user ID and date
+                let documentID = "\(userID)_\(dateString)"
+                
                 // Fetch study data for this day
-                let dailyRef = db.collection("DailyStudy").document(dateString)
+                let dailyRef = db.collection("DailyStudy").document(documentID)
                 dailyRef.getDocument { document, error in
                     if let document = document, document.exists, let data = document.data() {
                         if let totalTime = data["totalTime"] as? TimeInterval {
@@ -492,5 +565,510 @@ extension DataManager {
             let sortedData = dailyData.sorted(by: { $0.date < $1.date })
             completion(sortedData)
         }
+    }
+}
+
+// Add to DataManager.swift - Public Sets Support
+
+extension DataManager {
+    // Add a new set with public visibility option
+    func addSet(title: String, description: String?, cards: [FlashCard], isPublic: Bool = false) {
+        let db = Firestore.firestore()
+        
+        // Get the current user ID, if available
+        guard let userID = AuthManager.shared.getUserID() else {
+            print("Cannot create set: No user is signed in")
+            return
+        }
+        
+        // Create a new document in the Sets collection
+        let setRef = db.collection("Sets").document()
+        let setID = setRef.documentID
+        
+        // Include the userID and public flag in the set data
+        let setData: [String: Any] = [
+            "title": title,
+            "description": description ?? "",
+            "cardCount": cards.count,
+            "createdAt": Timestamp(date: Date()),
+            "userID": userID,
+            "isPublic": isPublic  // Add public visibility flag
+        ]
+        
+        // Create the set document
+        setRef.setData(setData) { error in
+            if let error = error {
+                print("Error creating set: \(error.localizedDescription)")
+                return
+            }
+            
+            // After creating the set, add each card to the Cards subcollection
+            for (index, card) in cards.enumerated() {
+                let cardRef = setRef.collection("Cards").document()
+                
+                let cardData: [String: Any] = [
+                    "term": card.term,
+                    "definition": card.definition,
+                    "position": index,
+                    "createdAt": Timestamp(date: Date())
+                ]
+                
+                cardRef.setData(cardData) { error in
+                    if let error = error {
+                        print("Error adding card: \(error.localizedDescription)")
+                    }
+                }
+            }
+            
+            // Update the user's setCount in their profile
+            self.incrementUserSetCount(userID: userID)
+            
+            // Refresh the sets list after adding
+            self.fetchSets()
+        }
+    }
+    
+    // Make an existing set public or private
+    func updateSetVisibility(setID: String, isPublic: Bool, completion: @escaping (Bool) -> Void = { _ in }) {
+        let db = Firestore.firestore()
+        let setRef = db.collection("Sets").document(setID)
+        
+        setRef.updateData([
+            "isPublic": isPublic
+        ]) { error in
+            if let error = error {
+                print("Error updating set visibility: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            completion(true)
+            
+            // Refresh the sets list
+            self.fetchSets()
+        }
+    }
+    
+    // Keep track of the number of sets a user has created
+    private func incrementUserSetCount(userID: String) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users").document(userID)
+        
+        // First get the current count
+        userRef.getDocument { document, error in
+            var currentCount = 0
+            
+            if let document = document, document.exists {
+                currentCount = document.data()?["setCount"] as? Int ?? 0
+            }
+            
+            // Increment the count
+            userRef.setData([
+                "setCount": currentCount + 1,
+                "email": Auth.auth().currentUser?.email ?? "",
+                "updatedAt": Timestamp(date: Date())
+            ], merge: true) { error in
+                if let error = error {
+                    print("Error updating user set count: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // Update user profile information
+    func updateUserProfile(displayName: String? = nil, username: String? = nil, completion: @escaping (Bool) -> Void = { _ in }) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(false)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users").document(userID)
+        
+        var userData: [String: Any] = [
+            "updatedAt": Timestamp(date: Date())
+        ]
+        
+        if let displayName = displayName {
+            userData["displayName"] = displayName
+        }
+        
+        if let username = username {
+            userData["username"] = username.lowercased()
+        }
+        
+        // Make sure we have the email
+        if let email = Auth.auth().currentUser?.email {
+            userData["email"] = email
+        }
+        
+        // Add createdAt if this is the first time
+        userRef.getDocument { document, error in
+            if let document = document, !document.exists {
+                userData["createdAt"] = Timestamp(date: Date())
+                userData["setCount"] = 0
+                userData["currentStreak"] = 0
+                userData["maxStreak"] = 0
+            }
+            
+            userRef.setData(userData, merge: true) { error in
+                if let error = error {
+                    print("Error updating user profile: \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                
+                completion(true)
+            }
+        }
+    }
+    
+    func updateUserDisplayName(username: String? = nil, displayName: String? = nil, completion: @escaping (Bool) -> Void = { _ in }) {
+        guard let userID = AuthManager.shared.getUserID(), let user = Auth.auth().currentUser else {
+            completion(false)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("Users").document(userID)
+        
+        // Get the existing user data
+        userRef.getDocument { document, error in
+            var userData: [String: Any] = [
+                "updatedAt": Timestamp(date: Date())
+            ]
+            
+            // Get email
+            let email = user.email ?? ""
+            userData["email"] = email
+            
+            // Username logic
+            if let username = username, !username.isEmpty {
+                userData["username"] = username.lowercased()
+            } else if let existingUsername = document?.data()?["username"] as? String, !existingUsername.isEmpty {
+                // Keep existing username
+            } else {
+                // Generate username from email if both are missing
+                userData["username"] = email.components(separatedBy: "@").first?.lowercased() ?? "user"
+            }
+            
+            // Display name logic
+            if let displayName = displayName, !displayName.isEmpty {
+                userData["displayName"] = displayName
+            } else if let existingDisplayName = document?.data()?["displayName"] as? String, !existingDisplayName.isEmpty {
+                // Keep existing display name
+            } else {
+                // Generate display name from username or email
+                let generatedUsername = userData["username"] as? String ?? email.components(separatedBy: "@").first ?? "User"
+                userData["displayName"] = generatedUsername.capitalized
+            }
+            
+            // Add createdAt if this is the first time
+            if document == nil || !document!.exists {
+                userData["createdAt"] = Timestamp(date: Date())
+                userData["setCount"] = 0
+                userData["currentStreak"] = 0
+                userData["maxStreak"] = 0
+            }
+            
+            userRef.setData(userData, merge: true) { error in
+                if let error = error {
+                    print("Error updating user profile: \(error.localizedDescription)")
+                    completion(false)
+                } else {
+                    completion(true)
+                }
+            }
+        }
+    }
+}
+
+// Add this extension to the DataManager.swift file
+
+// Extensions for handling recommended sets
+extension DataManager {
+    // Fetch recommended sets for the current user
+    func fetchRecommendedSets(completion: @escaping ([Set]) -> Void) {
+        let db = Firestore.firestore()
+        
+        // Get the current user ID
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion([])
+            return
+        }
+        
+        // Fetch user's class preferences from their profile
+        db.collection("Users").document(userID).getDocument { [weak self] document, error in
+            guard let self = self else { return }
+            
+            var userClasses: [String] = []
+            
+            if let document = document, document.exists, let data = document.data(),
+               let classes = data["apClasses"] as? [String] {
+                userClasses = classes
+            }
+            
+            if userClasses.isEmpty {
+                // If no classes selected, return empty array
+                completion([])
+                return
+            }
+            
+            // Query sets that match user's classes and are marked as recommended
+            let ref = db.collection("Sets")
+            
+            // Take up to 3 classes to keep the query manageable
+            let classesToQuery = Array(userClasses.prefix(3))
+            
+            // Build query to find sets that match selected classes
+            ref.whereField("isRecommended", isEqualTo: true)
+                .whereField("subject", in: classesToQuery)
+                .getDocuments { snapshot, error in
+                    guard error == nil else {
+                        print(error!.localizedDescription)
+                        completion([])
+                        return
+                    }
+                    
+                    var recommendedSets: [Set] = []
+                    
+                    if let snapshot = snapshot {
+                        // Process results
+                        for document in snapshot.documents {
+                            let data = document.data()
+                            
+                            let id = document.documentID
+                            let title = data["title"] as? String ?? ""
+                            let description = data["description"] as? String
+                            let cardCount = data["cardCount"] as? Int ?? 0
+                            let timestamp = data["createdAt"] as? Timestamp ?? Timestamp(date: Date())
+                            
+                            let newSet = Set(
+                                id: id,
+                                title: title,
+                                description: description,
+                                cardCount: cardCount,
+                                createdAt: timestamp.dateValue()
+                            )
+                            
+                            recommendedSets.append(newSet)
+                        }
+                    }
+                    
+                    // Return the recommended sets
+                    completion(recommendedSets)
+                }
+        }
+    }
+    
+    // Save a generated recommended set to the user's library
+    func saveRecommendedSet(title: String, description: String?, subject: String, cards: [FlashCard], completion: @escaping (Bool) -> Void = { _ in }) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(false)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let setRef = db.collection("Sets").document()
+        
+        // Create set data
+        let setData: [String: Any] = [
+            "title": title,
+            "description": description ?? "",
+            "cardCount": cards.count,
+            "createdAt": Timestamp(date: Date()),
+            "userID": userID,
+            "isPublic": false,
+            "subject": subject,
+            "isRecommended": true
+        ]
+        
+        // Create the set document
+        setRef.setData(setData) { error in
+            if let error = error {
+                print("Error creating recommended set: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            // After creating the set, add each card to the Cards subcollection
+            for (index, card) in cards.enumerated() {
+                let cardRef = setRef.collection("Cards").document()
+                
+                let cardData: [String: Any] = [
+                    "term": card.term,
+                    "definition": card.definition,
+                    "position": index,
+                    "createdAt": Timestamp(date: Date())
+                ]
+                
+                cardRef.setData(cardData) { error in
+                    if let error = error {
+                        print("Error adding card: \(error.localizedDescription)")
+                    }
+                }
+            }
+            
+            // Update the user's setCount in their profile
+            self.incrementUserSetCount(userID: userID)
+            
+            // Refresh the sets list after adding
+            self.fetchSets()
+            
+            completion(true)
+        }
+    }
+}
+
+
+
+extension DataManager {
+    // Update achievements when a set is created
+    func updateAchievementsForNewSet(cardCount: Int) {
+        guard let userID = AuthManager.shared.getUserID() else { return }
+        
+        let db = Firestore.firestore()
+        
+        // Get the user's current set count
+        db.collection("Users").document(userID).getDocument { document, error in
+            if let document = document, document.exists, let data = document.data() {
+                let setCount = data["setCount"] as? Int ?? 0
+                
+                // Update creation achievements
+                AchievementsManager.shared.checkSetCreationAchievements(setCount: setCount)
+                
+                // Update card count achievement
+                self.getTotalCardCount { totalCardCount in
+                    AchievementsManager.shared.checkCardCreationAchievement(totalCards: totalCardCount + cardCount)
+                }
+            }
+        }
+    }
+    
+    // Update achievements when a set is made public
+    func updateAchievementsForPublicSet() {
+        guard let userID = AuthManager.shared.getUserID() else { return }
+        
+        let db = Firestore.firestore()
+        
+        // Count public sets by this user
+        db.collection("Sets")
+            .whereField("userID", isEqualTo: userID)
+            .whereField("isPublic", isEqualTo: true)
+            .getDocuments { snapshot, error in
+                if let snapshot = snapshot {
+                    let publicSetCount = snapshot.documents.count
+                    AchievementsManager.shared.checkPublicSetAchievements(publicSetCount: publicSetCount)
+                }
+            }
+    }
+    
+    // Update achievements after completing a study session
+    func updateAchievementsForStudySession(setID: String, duration: TimeInterval) {
+        // Convert duration to minutes for achievement tracking
+        let studyMinutes = Int(duration / 60)
+        
+        // Get total study time
+        calculateTotalStudyTime { totalMinutes in
+            AchievementsManager.shared.checkStudyTimeAchievements(minutes: totalMinutes)
+        }
+        
+        // Check for streak achievements
+        getStudyStreak { currentStreak, maxStreak, _ in
+            AchievementsManager.shared.checkStreakAchievements(currentStreak: currentStreak)
+        }
+        
+        // Update diverse learner achievement (unique sets studied)
+        getUniqueStudiedSetsCount { uniqueSetCount in
+            AchievementsManager.shared.checkDiverseLearnerAchievement(uniqueSetCount: uniqueSetCount)
+        }
+    }
+    
+    // Calculate total study time across all sets
+    private func calculateTotalStudyTime(completion: @escaping (Int) -> Void) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(0)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("StudyTimes")
+            .whereField("userID", isEqualTo: userID)
+            .getDocuments { snapshot, error in
+                var totalTime: TimeInterval = 0
+                
+                if let snapshot = snapshot {
+                    for document in snapshot.documents {
+                        if let duration = document.data()["duration"] as? TimeInterval {
+                            totalTime += duration
+                        }
+                    }
+                }
+                
+                // Convert to minutes
+                let totalMinutes = Int(totalTime / 60)
+                completion(totalMinutes)
+            }
+    }
+    
+    // Get the total number of unique sets studied
+    private func getUniqueStudiedSetsCount(completion: @escaping (Int) -> Void) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(0)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("StudyTimes")
+            .whereField("userID", isEqualTo: userID)
+            .getDocuments { snapshot, error in
+                if let snapshot = snapshot {
+                    // Get unique set IDs using a dictionary for uniqueness
+                    var uniqueSetIDs = [String: Bool]()
+                    for document in snapshot.documents {
+                        if let setID = document.data()["setID"] as? String {
+                            uniqueSetIDs[setID] = true
+                        }
+                    }
+                    completion(uniqueSetIDs.count)
+                } else {
+                    completion(0)
+                }
+            }
+    }
+    
+    // Get the total card count created by the user
+    private func getTotalCardCount(completion: @escaping (Int) -> Void) {
+        guard let userID = AuthManager.shared.getUserID() else {
+            completion(0)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("Sets")
+            .whereField("userID", isEqualTo: userID)
+            .getDocuments { snapshot, error in
+                var totalCards = 0
+                
+                if let snapshot = snapshot {
+                    for document in snapshot.documents {
+                        if let cardCount = document.data()["cardCount"] as? Int {
+                            totalCards += cardCount
+                        }
+                    }
+                }
+                
+                completion(totalCards)
+            }
+    }
+    
+    // Update achievements after completing a matching game
+    func updateAchievementsForMatchingGame(timeUsed: TimeInterval) {
+        AchievementsManager.shared.checkMatchingGameAchievement(timeUsed: timeUsed)
+    }
+    
+    // Update achievement when profile is completed
+    func updateAchievementForProfileCompletion() {
+        AchievementsManager.shared.checkProfileCompletionAchievement(isComplete: true)
     }
 }

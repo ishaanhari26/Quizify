@@ -9,7 +9,7 @@ import Foundation
 import FirebaseAuth
 
 import FirebaseCore
-import FirebaseAuth
+import FirebaseFirestore
 import GoogleSignIn
 
 
@@ -199,3 +199,32 @@ extension AuthManager {
         return Auth.auth().currentUser?.uid
     }
 }
+
+extension AuthManager {
+    // Check if the current user has a completed profile
+    func userHasCompletedProfile() async -> Bool {
+        guard let userID = getUserID() else {
+            return false
+        }
+        
+        let db = Firestore.firestore()
+        
+        do {
+            let document = try await db.collection("Users").document(userID).getDocument()
+            
+            if let data = document.data(),
+               let username = data["username"] as? String,
+               !username.isEmpty,
+               let displayName = data["displayName"] as? String,
+               !displayName.isEmpty {
+                
+                return true
+            }
+            return false
+        } catch {
+            print("Error checking user profile: \(error.localizedDescription)")
+            return false
+        }
+    }
+}
+

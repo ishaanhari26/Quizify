@@ -4,7 +4,6 @@
 //
 //  Created by Rishi Suryavanshi on 3/25/25.
 
-
 import SwiftUI
 
 @MainActor
@@ -51,6 +50,7 @@ struct PhoneNumberEntryView: View {
     @StateObject private var viewModel = PhoneNumberViewModel()
     @State private var showVerificationView = false
     @Binding var goToHome: Bool
+    @Binding var showOnboarding: Bool
     
     var body: some View {
         ZStack {
@@ -129,9 +129,17 @@ struct PhoneNumberEntryView: View {
                 
                 // Skip button (make optional for your app)
                 Button(action: {
-                    // Skip 2FA for now
-                    goToHome = true
-                    dismiss()
+                    // Skip 2FA for now and check if profile exists
+                    Task {
+                        if await AuthManager.shared.userHasCompletedProfile() {
+                            // User has profile, skip onboarding
+                            goToHome = true
+                        } else {
+                            // User needs onboarding
+                            showOnboarding = true
+                        }
+                        dismiss()
+                    }
                 }) {
                     Text("Skip for now")
                         .font(.custom("Kiwi Maru Light", size: 16))
@@ -154,14 +162,16 @@ struct PhoneNumberEntryView: View {
         }
         .navigationBarBackButtonHidden(true)
         .fullScreenCover(isPresented: $viewModel.sentVerificationCode) {
-            TwoFactorAuthView(verificationID: viewModel.verificationID, goToHome: $goToHome)
-        }    }
+            TwoFactorAuthView(verificationID: viewModel.verificationID, goToHome: $goToHome, showOnboarding: $showOnboarding)
+        }
+    }
 }
 
-// Add an initializer with a default value for goToHome
+// Add an initializer with a default value for goToHome and showOnboarding
 extension PhoneNumberEntryView {
-    init(goToHome: Binding<Bool> = .constant(false)) {
+    init(goToHome: Binding<Bool> = .constant(false), showOnboarding: Binding<Bool> = .constant(false)) {
         self._goToHome = goToHome
+        self._showOnboarding = showOnboarding
     }
 }
 
@@ -169,7 +179,4 @@ struct PhoneNumberEntryView_Previews: PreviewProvider {
     static var previews: some View {
         PhoneNumberEntryView()
     }
-}
-#Preview {
-    PhoneNumberEntryView()
 }
