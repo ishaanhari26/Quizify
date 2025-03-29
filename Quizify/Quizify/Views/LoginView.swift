@@ -311,9 +311,17 @@ struct LoginView: View {
         }
         .ignoresSafeArea(.keyboard)
         .frame(maxHeight: 650)
+      
         .fullScreenCover(isPresented: $showTwoFactorSetup) {
             PhoneNumberEntryView(goToHome: $goToHome, showOnboarding: $showOnboarding)
+                .onDisappear {
+                    // Check if we need to dismiss this view
+                    if goToHome {
+                        dismiss()
+                    }
+                }
         }
+
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(goToHome: $goToHome)
         }

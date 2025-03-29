@@ -139,6 +139,7 @@ struct AchievementsView: View {
             // Refresh achievements when view appears
             achievementsManager.loadAchievements()
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     // MARK: - Computed Properties

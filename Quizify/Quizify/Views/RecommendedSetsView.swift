@@ -219,7 +219,7 @@ struct RecommendedSetsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
-                Text("Recommended Sets")
+                Text("Curated Sets")
                     .font(.custom("Kiwi Maru Light", size: 25))
                     .foregroundColor(Color(.gray))
                 

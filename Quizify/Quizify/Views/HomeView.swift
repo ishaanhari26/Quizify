@@ -103,16 +103,17 @@ struct HomeView: View {
                     }
                 }
                 
-                NavigationLink(destination: Text("Settings View")) {
+                NavigationLink(destination: AchievementsView()) {
                     HStack(spacing: 15) {
-                        Image(systemName: "gear")
+                        Image(systemName: "trophy.fill")
                             .font(.system(size: 20))
                             .foregroundColor(Color(hex: "#C97D60"))
-                        Text("Settings")
+                        Text("Achievements")
                             .font(.custom("Kiwi Maru Light", size: 16))
                             .foregroundColor(.black)
                     }
                 }
+                
                 
                 NavigationLink(destination: StudyAnalyticsView().environmentObject(dataManager)) {
                     HStack(spacing: 15) {
@@ -214,7 +215,7 @@ struct HomeView: View {
                             // Analytics Section
                             VStack(alignment: .leading) {
                                 HStack {
-                                    Text("Your Study Activity")
+                                    Text("Study Activity")
                                         .font(.custom("Kiwi Maru Light", size: 25))
                                         .foregroundColor(Color(.gray))
                                     
@@ -260,7 +261,7 @@ struct HomeView: View {
                                 
 
                                 AchievementsSectionView()
-                                    .navigationBarBackButtonHidden()
+                                   
                             }
 
                             
