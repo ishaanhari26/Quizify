@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+import FirebaseCore
+import FirebaseFirestore
+import FirebaseAuth
+
 @MainActor
 final class SettingsViewModel : ObservableObject {
     func logOut() throws {
@@ -99,16 +103,17 @@ struct HomeView: View {
                     }
                 }
                 
-                NavigationLink(destination: Text("Settings View")) {
+                NavigationLink(destination: AchievementsView()) {
                     HStack(spacing: 15) {
-                        Image(systemName: "gear")
+                        Image(systemName: "trophy.fill")
                             .font(.system(size: 20))
                             .foregroundColor(Color(hex: "#C97D60"))
-                        Text("Settings")
+                        Text("Achievements")
                             .font(.custom("Kiwi Maru Light", size: 16))
                             .foregroundColor(.black)
                     }
                 }
+                
                 
                 NavigationLink(destination: StudyAnalyticsView().environmentObject(dataManager)) {
                     HStack(spacing: 15) {
@@ -210,7 +215,7 @@ struct HomeView: View {
                             // Analytics Section
                             VStack(alignment: .leading) {
                                 HStack {
-                                    Text("Your Study Activity")
+                                    Text("Study Activity")
                                         .font(.custom("Kiwi Maru Light", size: 25))
                                         .foregroundColor(Color(.gray))
                                     
@@ -246,23 +251,21 @@ struct HomeView: View {
                             
                             Spacer().frame(height: 30)
                             
+                            // Recommended Sets Section
+                            RecommendedSetsView()
+                                .environmentObject(dataManager)
+                            
+                            Spacer().frame(height: 30)
+                            
                             VStack(alignment: .leading) {
-                                Text("Achievements")
-                                    .font(.custom("Kiwi Maru Light", size: 25))
-                                    .foregroundColor(Color(.gray))
-                                    .padding(.leading, 30)
                                 
-                                // Placeholder for achievements section
-                                HStack {
-                                    Spacer()
-                                    Text("Coming soon!")
-                                        .font(.custom("Kiwi Maru Light", size: 18))
-                                        .foregroundColor(Color(.gray))
-                                        .padding()
-                                    Spacer()
-                                }
-                                .frame(height: 150)
+
+                                AchievementsSectionView()
+                                   
                             }
+
+                            
+                            
                         }
                         .padding(.bottom, 50)
                         .onAppear {

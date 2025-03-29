@@ -129,9 +129,17 @@ struct PhoneNumberEntryView: View {
                 
                 // Skip button (make optional for your app)
                 Button(action: {
-                    // Skip 2FA for now and go to onboarding
-                    showOnboarding = true
-                    dismiss()
+                    // Skip 2FA for now and check if profile exists
+                    Task {
+                        if await AuthManager.shared.userHasCompletedProfile() {
+                            // User has profile, skip onboarding
+                            goToHome = true
+                        } else {
+                            // User needs onboarding
+                            showOnboarding = true
+                        }
+                        dismiss()
+                    }
                 }) {
                     Text("Skip for now")
                         .font(.custom("Kiwi Maru Light", size: 16))

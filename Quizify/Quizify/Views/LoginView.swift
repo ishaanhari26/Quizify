@@ -117,17 +117,24 @@ final class LoginEmailViewModel : ObservableObject {
         do {
             let document = try await db.collection("Users").document(userID).getDocument()
             
-            // Check if user data exists and contains onboarding fields
-            if let data = document.data(),
-               let displayName = data["displayName"] as? String,
-               !displayName.isEmpty,
-               let username = data["username"] as? String,
-               !username.isEmpty {
-                
-                // User has already completed onboarding
-                isNewUser = false
+            // Check if user data exists with required profile fields
+            if let data = document.data() {
+                // If the user has a username AND displayName, they've completed onboarding
+                if let username = data["username"] as? String,
+                   !username.isEmpty,
+                   let displayName = data["displayName"] as? String,
+                   !displayName.isEmpty {
+                    
+                    // User has already completed onboarding
+                    isNewUser = false
+                    shouldShowOnboarding = false
+                } else {
+                    // User needs to complete onboarding
+                    isNewUser = true
+                    shouldShowOnboarding = true
+                }
             } else {
-                // User needs to complete onboarding
+                // Document exists but is empty or doesn't exist
                 isNewUser = true
                 shouldShowOnboarding = true
             }
@@ -276,7 +283,7 @@ struct LoginView: View {
                                 goToHome = true
                                 dismiss()
                             } else {
-                                // No 2FA required (fallback)
+                                // No 2FA required (fallback for older accounts)
                                 goToHome = true
                                 dismiss()
                             }
@@ -304,9 +311,17 @@ struct LoginView: View {
         }
         .ignoresSafeArea(.keyboard)
         .frame(maxHeight: 650)
+      
         .fullScreenCover(isPresented: $showTwoFactorSetup) {
             PhoneNumberEntryView(goToHome: $goToHome, showOnboarding: $showOnboarding)
+                .onDisappear {
+                    // Check if we need to dismiss this view
+                    if goToHome {
+                        dismiss()
+                    }
+                }
         }
+
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(goToHome: $goToHome)
         }

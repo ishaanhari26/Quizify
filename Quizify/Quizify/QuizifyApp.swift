@@ -18,6 +18,8 @@ struct QuizifyApp: App {
     init() {
         // Set up keyboard dismissal
         KeyboardDismisser.shared.setupKeyboardDismissal()
+        
+
     }
     
     var body: some Scene {
@@ -25,6 +27,12 @@ struct QuizifyApp: App {
             GreetingView()
                 .environmentObject(dataManager)
                 .onAppear {
+                    // Initialize achievements manager after app has appeared
+                    // and Firebase has been configured
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        _ = AchievementsManager.shared
+                    }
+                    
                     // Register for remote notifications
                     UIApplication.shared.registerForRemoteNotifications()
                 }

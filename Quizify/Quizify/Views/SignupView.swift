@@ -159,12 +159,76 @@ struct SignupView: View {
             PhoneNumberEntryView(goToHome: .constant(false), showOnboarding: $showOnboarding)
                 .onDisappear {
                     if showOnboarding {
-                        viewModel.shouldShowOnboarding = true
+                        // Check if user profile exists before showing onboarding
+                        Task {
+                            if let userID = AuthManager.shared.getUserID() {
+                                let db = Firestore.firestore()
+                                do {
+                                    let document = try await db.collection("Users").document(userID).getDocument()
+                                    if let data = document.data(),
+                                       let username = data["username"] as? String,
+                                       !username.isEmpty,
+                                       let displayName = data["displayName"] as? String,
+                                       !displayName.isEmpty {
+                                        
+                                        // User has profile, skip onboarding
+                                        viewModel.shouldShowOnboarding = false
+                                        goToHome = true
+                                    } else {
+                                        // User needs onboarding
+                                        viewModel.shouldShowOnboarding = true
+                                    }
+                                } catch {
+                                    // On error, show onboarding
+                                    viewModel.shouldShowOnboarding = true
+                                }
+                            } else {
+                                viewModel.shouldShowOnboarding = true
+                            }
+                        }
                     }
                 }
         }
-        .fullScreenCover(isPresented: $viewModel.shouldShowOnboarding) {
-            OnboardingView(goToHome: $goToHome, dismissParent: $shouldDismissView)
+        .sheet(isPresented: $viewModel.shouldShowTwoFactor) {
+            PhoneNumberEntryView(goToHome: .constant(false), showOnboarding: $showOnboarding)
+                .onDisappear {
+                    // Check if we need to dismiss this view (i.e., if goToHome is true)
+                    if goToHome {
+                        dismiss()
+                    }
+                    
+                    if showOnboarding {
+                        // Check if user profile exists before showing onboarding
+                        Task {
+                            if let userID = AuthManager.shared.getUserID() {
+                                let db = Firestore.firestore()
+                                do {
+                                    let document = try await db.collection("Users").document(userID).getDocument()
+                                    if let data = document.data(),
+                                       let username = data["username"] as? String,
+                                       !username.isEmpty,
+                                       let displayName = data["displayName"] as? String,
+                                       !displayName.isEmpty {
+                                        
+                                        // User has profile, skip onboarding
+                                        viewModel.shouldShowOnboarding = false
+                                        goToHome = true
+                                        // Dismiss this view also
+                                        dismiss()
+                                    } else {
+                                        // User needs onboarding
+                                        viewModel.shouldShowOnboarding = true
+                                    }
+                                } catch {
+                                    // On error, show onboarding
+                                    viewModel.shouldShowOnboarding = true
+                                }
+                            } else {
+                                viewModel.shouldShowOnboarding = true
+                            }
+                        }
+                    }
+                }
         }
         
         // And add this to watch for changes to shouldDismissView:

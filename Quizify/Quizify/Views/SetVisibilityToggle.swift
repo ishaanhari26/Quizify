@@ -73,7 +73,12 @@ struct SetVisibilityToggle: View {
     
     private func updateVisibility() {
         dataManager.updateSetVisibility(setID: setID, isPublic: isPublic) { success in
-            if !success {
+            if success {
+                // If set is being made public, update achievements
+                if isPublic {
+                    dataManager.updateAchievementsForPublicSet()
+                }
+            } else {
                 // Revert the toggle if update failed
                 isPublic.toggle()
             }

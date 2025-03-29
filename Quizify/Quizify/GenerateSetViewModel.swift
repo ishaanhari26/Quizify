@@ -70,6 +70,14 @@ class GenerateSetViewModel: ObservableObject {
             isPublic: isPublic
         )
         
+        // Update achievements for creating a new set
+        dataManager.updateAchievementsForNewSet(cardCount: generatedCards.count)
+        
+        // If the set is public, update public set achievements
+        if isPublic {
+            dataManager.updateAchievementsForPublicSet()
+        }
+        
         completion()
     }
 }
