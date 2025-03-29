@@ -166,3 +166,121 @@ actor GeminiService {
         return cards
     }
 }
+
+// Add these helper functions to GeminiService.swift to handle recommended set generation
+
+extension GeminiService {
+    
+    /// Generate recommended flashcards for a specific AP subject
+    /// - Parameters:
+    ///   - subject: The AP subject to generate cards for
+    ///   - topic: Optional specific topic within the subject
+    ///   - cardCount: The desired number of flashcards
+    /// - Returns: An array of FlashCard objects
+    func generateRecommendedFlashcards(subject: String, topic: String? = nil, cardCount: Int = 10) async throws -> [FlashCard] {
+        // Build prompt based on subject and optional topic
+        let specificTopic = topic ?? "key concepts"
+        
+        let prompt = """
+        Generate \(cardCount) flashcards for \(subject) covering \(specificTopic).
+        
+        Each flashcard should have:
+        1. A clear, concise term (key concept, person, event, formula, etc.)
+        2. A comprehensive but concise definition suitable for AP exam preparation
+        
+        Focus on terms that AP students are likely to encounter on the exam. 
+        Each definition should be about 1-2 sentences and factually accurate.
+        """
+        
+        // Call the standard flashcards generation method
+        return try await generateFlashcards(from: prompt, cardCount: cardCount)
+    }
+    
+    /// Generate recommended sets for multiple subjects
+    /// - Parameter subjects: Array of AP subjects the user is studying
+    /// - Returns: Dictionary mapping subjects to arrays of recommended set topics
+    func generateRecommendedTopics(for subjects: [String]) async throws -> [String: [(String, String)]] {
+        // Early exit for empty subjects
+        if subjects.isEmpty {
+            return [:]
+        }
+        
+        // Take only the first 3 subjects to generate recommendations for
+        let subjectsToUse = Array(subjects.prefix(3))
+        
+        // Build prompt for Gemini to generate topics
+        let subjectsList = subjectsToUse.joined(separator: ", ")
+        let prompt = """
+        For each of these AP subjects: \(subjectsList)
+        
+        Generate 2 important topics that AP students should study, with each topic having:
+        1. A brief title (3-5 words)
+        2. A short description (under 10 words)
+        
+        Format as JSON like:
+        {
+          "AP Biology": [
+            {"title": "Cell Division", "description": "Mitosis and meiosis processes"},
+            {"title": "Biochemical Pathways", "description": "Enzyme functions and metabolic processes"}
+          ],
+          "AP Chemistry": [
+            {"title": "Periodic Trends", "description": "Properties across the periodic table"},
+            {"title": "Chemical Equilibrium", "description": "Understanding Le Chatelier's principle"}
+          ]
+        }
+        
+        Focus on essential topics that would be most useful for AP exam preparation.
+        """
+        
+        // Use predefined topics if Gemini API fails
+        // In a real app, you would handle this more robustly
+        let predefinedTopics: [String: [(String, String)]] = [
+            "AP Biology": [
+                ("Cell Structure & Function", "Understanding cellular components"),
+                ("Genetics & Heredity", "DNA, RNA, and inheritance patterns")
+            ],
+            "AP Chemistry": [
+                ("Periodic Trends", "Properties across the periodic table"),
+                ("Acid-Base Reactions", "Understanding pH and neutralization")
+            ],
+            "AP Physics 1": [
+                ("Newton's Laws", "Fundamental principles of motion"),
+                ("Work & Energy", "Conservation principles in mechanics")
+            ],
+            "AP Calculus AB": [
+                ("Derivatives & Applications", "Differentiation techniques"),
+                ("Integration Techniques", "Finding antiderivatives")
+            ],
+            "AP Literature": [
+                ("Literary Devices", "Techniques authors use for effect"),
+                ("Analysis Frameworks", "Critical approaches to text")
+            ],
+            "AP World History": [
+                ("Industrial Revolution", "Global economic transformation"),
+                ("Cold War", "Tension between superpowers")
+            ],
+            "AP Psychology": [
+                ("Brain Structure", "Anatomy and neural functions"),
+                ("Development Theories", "Life stages and cognition")
+            ]
+        ]
+        
+        // In a real implementation, you would use Gemini API to generate topics
+        // For now, return predefined topics
+        var result: [String: [(String, String)]] = [:]
+        
+        for subject in subjectsToUse {
+            if let topics = predefinedTopics[subject] {
+                result[subject] = topics
+            } else {
+                // For subjects without predefined topics, provide generic ones
+                result[subject] = [
+                    ("Key Concepts", "Essential principles and terminology"),
+                    ("Common Questions", "Frequently tested material")
+                ]
+            }
+        }
+        
+        return result
+    }
+}

@@ -126,9 +126,18 @@ struct TwoFactorAuthView: View {
                         await viewModel.verifyCode()
                         
                         if viewModel.isVerified {
-                            // Instead of going directly to home, go to onboarding
-                            showOnboarding = true
-                            dismiss()
+                            // Check if profile exists before routing
+                            Task {
+                                if await AuthManager.shared.userHasCompletedProfile() {
+                                    // If user has profile, go to home
+                                    goToHome = true
+                                    dismiss()
+                                } else {
+                                    // Otherwise, go to onboarding
+                                    showOnboarding = true
+                                    dismiss()
+                                }
+                            }
                         }
                     }
                 }) {

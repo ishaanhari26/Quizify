@@ -246,6 +246,12 @@ struct HomeView: View {
                             
                             Spacer().frame(height: 30)
                             
+                            // Recommended Sets Section
+                            RecommendedSetsView()
+                                .environmentObject(dataManager)
+                            
+                            Spacer().frame(height: 30)
+                            
                             VStack(alignment: .leading) {
                                 Text("Achievements")
                                     .font(.custom("Kiwi Maru Light", size: 25))
@@ -263,6 +269,8 @@ struct HomeView: View {
                                 }
                                 .frame(height: 150)
                             }
+                            
+                            
                         }
                         .padding(.bottom, 50)
                         .onAppear {
