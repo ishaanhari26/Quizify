@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct SetsListView: View {
     @EnvironmentObject var dataManager: DataManager
@@ -200,7 +201,7 @@ struct SetsListView: View {
     }
 }
 
-// Custom Set Card View component
+// Update SetCardView in SetsListView.swift
 struct SetCardView: View {
     let set: Set
     
@@ -234,13 +235,33 @@ struct SetCardView: View {
                     Text(description)
                         .font(.custom("Kiwi Maru Light", size: 14))
                         .foregroundColor(.secondary)
-                        .lineLimit(2)
+                        .lineLimit(1)
                 }
                 
-                // Date formatter
-                Text(formattedDate(set.createdAt))
-                    .font(.custom("Kiwi Maru Light", size: 12))
-                    .foregroundColor(Color(hex: "#C97D60"))
+                // Study time and date info
+                HStack {
+                    // Date formatter
+                    Text(formattedDate(set.createdAt))
+                        .font(.custom("Kiwi Maru Light", size: 12))
+                        .foregroundColor(Color(hex: "#C97D60"))
+                    
+                    // Study time if available
+                    if let totalTime = set.totalStudyTime, totalTime > 0 {
+                        Circle()
+                            .fill(Color(hex: "#C97D60").opacity(0.5))
+                            .frame(width: 4, height: 4)
+                        
+                        HStack(spacing: 2) {
+                            Image(systemName: "clock")
+                                .font(.system(size: 10))
+                                .foregroundColor(Color(hex: "#C97D60"))
+                            
+                            Text(set.formattedStudyTime)
+                                .font(.custom("Kiwi Maru Light", size: 12))
+                                .foregroundColor(Color(hex: "#C97D60"))
+                        }
+                    }
+                }
             }
             .padding(.vertical, 10)
             
@@ -275,6 +296,9 @@ struct SetDetailView: View {
     @State private var currentCardIndex = 0
     @State private var flipped = false
     @Environment(\.dismiss) var dismiss
+    @StateObject private var timeTracker = StudyTimeTracker()
+    @State private var showVisibilityToggle = false
+    @State private var isOwner = false
     
     let setID: String
     let setTitle: String
@@ -287,6 +311,20 @@ struct SetDetailView: View {
             VStack(spacing: 0) {
                 // Custom header
                 headerView
+                
+                if isOwner {
+                    HStack {
+                        Spacer()
+                        SetVisibilityToggle(setID: setID)
+                            .frame(width: 150)
+                            .padding(.trailing, 20)
+                    }
+                    .padding(.top, 10)
+                }
+                
+                if timeTracker.isTracking {
+                    studyTimerView
+                }
                 
                 // Content
                 if isLoading {
@@ -358,12 +396,41 @@ struct SetDetailView: View {
         }
         .onAppear {
             loadCards()
+            
+            // Start tracking time when view appears
+            if !timeTracker.isTracking {
+                timeTracker.startTracking(setID: setID)
+            }
+            
+            // Check if current user is the owner of this set
+            checkOwnership()
+        }
+        .onDisappear {
+            // Stop tracking when view disappears
+            if timeTracker.isTracking {
+                timeTracker.stopTracking(dataManager: dataManager)
+            }
         }
         .navigationBarBackButtonHidden(true)
     }
     
-    // MARK: - Component Views
+    private var studyTimerView: some View {
+        HStack {
+            Image(systemName: "clock")
+                .foregroundColor(Color(hex: "#C97D60"))
+            
+            Text(timeTracker.formattedTime(from: timeTracker.elapsedTime))
+                .font(.custom("Kiwi Maru Regular", size: 16))
+                .foregroundColor(Color(hex: "#C97D60"))
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 15)
+        .background(Color(hex: "#C97D60").opacity(0.1))
+        .cornerRadius(15)
+        .padding(.top, 10)
+    }
     
+    // MARK: - Component Views
     private var headerView: some View {
         ZStack {
             Color(hex: "#C97D60").ignoresSafeArea(edges: .top)
@@ -386,10 +453,13 @@ struct SetDetailView: View {
                     
                     Spacer()
                     
-                    // Add a study progress button or icon here if needed
-                    Color.clear
-                        .frame(width: 22, height: 22)
-                        .padding(.trailing, 20)
+                    // Add a game button
+                    NavigationLink(destination: MatchingGameView(setID: setID, setTitle: setTitle)) {
+                        Image(systemName: "gamecontroller.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 22))
+                    }
+                    .padding(.trailing, 20)
                 }
                 .padding(.top, 25)
                 .padding(.bottom, 15)
@@ -397,6 +467,23 @@ struct SetDetailView: View {
         }
         .frame(height: 75)
     }
+    
+//    ADD ANYWHERE
+//    Button(action: {
+//        // This action will be handled by the NavigationLink
+//    }) {
+//        NavigationLink(destination: MatchingGameView(setID: setID, setTitle: setTitle)) {
+//            ZStack {
+//                Circle()
+//                    .fill(Color(hex: "#6082C9"))
+//                    .frame(width: 60, height: 60)
+//                
+//                Image(systemName: "gamecontroller.fill")
+//                    .font(.system(size: 24))
+//                    .foregroundColor(.white)
+//            }
+//        }
+//    }
     
     private var loadingView: some View {
         VStack {
@@ -567,6 +654,25 @@ struct SetDetailView: View {
             .disabled(currentCardIndex >= cards.count - 1)
         }
         .padding(.vertical, 10)
+    }
+    
+    
+    
+    private func checkOwnership() {
+        guard let currentUserID = AuthManager.shared.getUserID() else {
+            isOwner = false
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("Sets").document(setID).getDocument { document, error in
+            if let document = document, document.exists {
+                let ownerID = document.data()?["userID"] as? String ?? ""
+                self.isOwner = (ownerID == currentUserID)
+            } else {
+                self.isOwner = false
+            }
+        }
     }
     
     // Removed allCardsList since it's now integrated directly in the body

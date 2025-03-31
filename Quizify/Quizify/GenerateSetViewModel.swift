@@ -19,6 +19,7 @@ class GenerateSetViewModel: ObservableObject {
     @Published var setTitle: String = ""
     @Published var setDescription: String = ""
     @Published var showDescription: Bool = true
+    @Published var isPublic: Bool = false
     
     // Generate flashcards based on the prompt
     func generateFlashcards() async {
@@ -65,8 +66,17 @@ class GenerateSetViewModel: ObservableObject {
         dataManager.addSet(
             title: setTitle,
             description: showDescription ? setDescription : nil,
-            cards: generatedCards
+            cards: generatedCards,
+            isPublic: isPublic
         )
+        
+        // Update achievements for creating a new set
+        dataManager.updateAchievementsForNewSet(cardCount: generatedCards.count)
+        
+        // If the set is public, update public set achievements
+        if isPublic {
+            dataManager.updateAchievementsForPublicSet()
+        }
         
         completion()
     }
