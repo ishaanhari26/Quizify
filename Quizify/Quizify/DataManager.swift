@@ -1072,3 +1072,75 @@ extension DataManager {
         AchievementsManager.shared.checkProfileCompletionAchievement(isComplete: true)
     }
 }
+
+
+extension DataManager {
+    // Add these methods to DataManager for enhanced recommendations
+    
+    func getUserLearningMetrics() async -> [String: Any] {
+        guard let userID = AuthManager.shared.getUserID() else { return [:] }
+        
+        // Efficiently fetch only necessary data for recommendations
+        let db = Firestore.firestore()
+        
+        do {
+            // Get recent study sessions (last 30 days)
+            let recentSessions = try await db.collection("StudyTimes")
+                .whereField("userID", isEqualTo: userID)
+                .whereField("timestamp", isGreaterThan: Timestamp(date: Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()))
+                .order(by: "timestamp", descending: true)
+                .limit(to: 50)
+                .getDocuments()
+            
+            var metrics: [String: Any] = [:]
+            var sessionTimes: [Date] = []
+            var sessionDurations: [TimeInterval] = []
+            
+            for doc in recentSessions.documents {
+                let data = doc.data()
+                if let timestamp = data["timestamp"] as? Timestamp,
+                   let duration = data["duration"] as? TimeInterval {
+                    sessionTimes.append(timestamp.dateValue())
+                    sessionDurations.append(duration)
+                }
+            }
+            
+            // Calculate key metrics efficiently
+            metrics["totalSessions"] = sessionTimes.count
+            metrics["averageDuration"] = sessionDurations.isEmpty ? 0 : sessionDurations.reduce(0, +) / Double(sessionDurations.count)
+            metrics["recentActivity"] = sessionTimes.count
+            
+            return metrics
+        } catch {
+            print("Error fetching learning metrics: \(error)")
+            return [:]
+        }
+    }
+    
+    func getOptimalStudyTime() async -> Int {
+        guard let userID = AuthManager.shared.getUserID() else { return 15 } // Default 3 PM
+        
+        let db = Firestore.firestore()
+        
+        do {
+            let sessions = try await db.collection("StudyTimes")
+                .whereField("userID", isEqualTo: userID)
+                .order(by: "timestamp", descending: true)
+                .limit(to: 30)
+                .getDocuments()
+            
+            var hourCounts: [Int: Int] = [:]
+            
+            for doc in sessions.documents {
+                if let timestamp = (doc.data()["timestamp"] as? Timestamp) {
+                    let hour = Calendar.current.component(.hour, from: timestamp.dateValue())
+                    hourCounts[hour, default: 0] += 1
+                }
+            }
+            
+            return hourCounts.max(by: { $0.value < $1.value })?.key ?? 15
+        } catch {
+            return 15 // Default fallback
+        }
+    }
+}

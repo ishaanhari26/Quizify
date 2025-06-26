@@ -251,9 +251,43 @@ struct HomeView: View {
                             
                             Spacer().frame(height: 30)
                             
-                            // Recommended Sets Section
-                            RecommendedSetsView()
+                        
+                            
+                            // Enhanced AI Learning Coach Section
+                            EnhancedRecommendationsView(dataManager: dataManager)
                                 .environmentObject(dataManager)
+                            
+                            // Optional: Keep original recommended sets as fallback or additional content
+                            Spacer().frame(height: 20)
+                            
+                            // Traditional Recommended Sets (Optional - can be removed)
+                            VStack(alignment: .leading) {
+                                HStack {
+                                    Text("Curated Sets")
+                                        .font(.custom("Kiwi Maru Light", size: 20))
+                                        .foregroundColor(Color(.gray))
+                                    
+                                    Spacer()
+                                    
+                                    NavigationLink(destination: EnhancedRecommendationsView(dataManager: dataManager).environmentObject(dataManager)) {
+                                        Text("See All")
+                                            .font(.custom("Kiwi Maru Light", size: 16))
+                                            .foregroundColor(Color(hex: "#C97D60"))
+                                    }
+                                }
+                                .padding(.horizontal, 30)
+                                
+                                // Compact version of traditional recommendations
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 15) {
+                                        ForEach(0..<3) { index in
+                                            CompactRecommendedSetCard(index: index)
+                                        }
+                                    }
+                                    .padding(.horizontal, 30)
+                                }
+                            }
+
                             
                             Spacer().frame(height: 30)
                             
@@ -551,6 +585,64 @@ struct HomeView: View {
             Spacer()
         }
         .frame(height: 170)
+    }
+}
+
+// MARK: - Compact Recommended Set Card
+struct CompactRecommendedSetCard: View {
+    let index: Int
+    
+    // Sample data - replace with actual recommended sets
+    private let sampleSets = [
+        ("AP Biology Basics", "Cell Structure & Function", "Biology", 12),
+        ("Chemistry Essentials", "Periodic Trends", "Chemistry", 15),
+        ("Physics Fundamentals", "Forces & Motion", "Physics", 10)
+    ]
+    
+    var body: some View {
+        let set = sampleSets[index % sampleSets.count]
+        
+        VStack(alignment: .leading, spacing: 8) {
+            // Subject badge
+            Text(set.2)
+                .font(.custom("Kiwi Maru Light", size: 10))
+                .foregroundColor(.white)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color(hex: "#6082C9"))
+                .cornerRadius(8)
+            
+            Spacer()
+            
+            // Set title
+            Text(set.0)
+                .font(.custom("Kiwi Maru Regular", size: 12))
+                .foregroundColor(.white)
+                .lineLimit(2)
+            
+            // Description
+            Text(set.1)
+                .font(.custom("Kiwi Maru Light", size: 10))
+                .foregroundColor(.white.opacity(0.8))
+                .lineLimit(1)
+            
+            // Card count
+            HStack {
+                Text("\(set.3) cards")
+                    .font(.custom("Kiwi Maru Light", size: 10))
+                    .foregroundColor(.white.opacity(0.8))
+                
+                Spacer()
+                
+                Image(systemName: "plus.circle.fill")
+                    .foregroundColor(.white)
+                    .font(.system(size: 14))
+            }
+        }
+        .padding(10)
+        .frame(width: 120, height: 100)
+        .background(Color(hex: "#C97D60"))
+        .cornerRadius(10)
     }
 }
 

@@ -81,9 +81,9 @@ final class LoginEmailViewModel : ObservableObject {
         
         let accessToken = gidResult.user.accessToken.tokenString
         let tokens = GoogleSignInResultModel(idToken: idToken, accessToken: accessToken)
-<<<<<<< HEAD
+
         try await AuthManager.shared.signInWithGoogle(tokens: tokens)
-=======
+
         
         do {
             try await AuthManager.shared.signInWithGoogle(tokens: tokens)
@@ -146,7 +146,7 @@ final class LoginEmailViewModel : ObservableObject {
             shouldShowOnboarding = true
             print("Error checking onboarding status: \(error.localizedDescription)")
         }
->>>>>>> 976198e7da729598e1f2bd708f7cd479fed3c488
+
     }
 }
 

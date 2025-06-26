@@ -37,12 +37,14 @@
 		CB0FC1592D9731CB004A8530 /* SetVisibilityToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC1582D9731CB004A8530 /* SetVisibilityToggle.swift */; };
 		CB0FC15B2D973458004A8530 /* PublicSetsManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC15A2D973458004A8530 /* PublicSetsManagerView.swift */; };
 		CB0FC16B2D975704004A8530 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0FC16A2D975704004A8530 /* OnboardingView.swift */; };
+		CB2810B02DF28F4300A9DC05 /* PersonalizedRecommendationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2810AF2DF28F4300A9DC05 /* PersonalizedRecommendationsManager.swift */; };
+		CB2810B22DF28FE400A9DC05 /* AdaptiveLearningEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2810B12DF28FE400A9DC05 /* AdaptiveLearningEngine.swift */; };
 		CB6602952CE66DCA004BD579 /* KiwiMaru-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25B2CE42A2F001F8ED0 /* KiwiMaru-Light.ttf */; };
 		CB6602962CE66DCA004BD579 /* KiwiMaru-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25C2CE42A30001F8ED0 /* KiwiMaru-Medium.ttf */; };
 		CB6602972CE66DCA004BD579 /* KiwiMaru-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CBECC25A2CE42A2E001F8ED0 /* KiwiMaru-Regular.ttf */; };
 		CB6602992CE67605004BD579 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6602982CE67605004BD579 /* SignupView.swift */; };
 		CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB66029A2CE6BF65004BD579 /* HomeView.swift */; };
-		CB7AEB062D98901800474E80 /* RecommendedSetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7AEB052D98901800474E80 /* RecommendedSetsView.swift */; };
+		CB7AEB062D98901800474E80 /* EnhancedRecommendedSetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7AEB052D98901800474E80 /* EnhancedRecommendedSetsView.swift */; };
 		CB7AEB102D98972C00474E80 /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7AEB0F2D98972C00474E80 /* Achievement.swift */; };
 		CB7AEB122D9897BE00474E80 /* AchievementsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7AEB112D9897BE00474E80 /* AchievementsManager.swift */; };
 		CB7AEB142D9897D100474E80 /* AchievementsSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7AEB132D9897D100474E80 /* AchievementsSectionView.swift */; };
@@ -103,9 +105,11 @@
 		CB0FC1582D9731CB004A8530 /* SetVisibilityToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetVisibilityToggle.swift; sourceTree = "<group>"; };
 		CB0FC15A2D973458004A8530 /* PublicSetsManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicSetsManagerView.swift; sourceTree = "<group>"; };
 		CB0FC16A2D975704004A8530 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		CB2810AF2DF28F4300A9DC05 /* PersonalizedRecommendationsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizedRecommendationsManager.swift; sourceTree = "<group>"; };
+		CB2810B12DF28FE400A9DC05 /* AdaptiveLearningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLearningEngine.swift; sourceTree = "<group>"; };
 		CB6602982CE67605004BD579 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		CB66029A2CE6BF65004BD579 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		CB7AEB052D98901800474E80 /* RecommendedSetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendedSetsView.swift; sourceTree = "<group>"; };
+		CB7AEB052D98901800474E80 /* EnhancedRecommendedSetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedRecommendedSetsView.swift; sourceTree = "<group>"; };
 		CB7AEB0F2D98972C00474E80 /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
 		CB7AEB112D9897BE00474E80 /* AchievementsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsManager.swift; sourceTree = "<group>"; };
 		CB7AEB132D9897D100474E80 /* AchievementsSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsSectionView.swift; sourceTree = "<group>"; };
@@ -224,8 +228,10 @@
 				CB8332822D6913EE00ACDC99 /* AuthManager.swift */,
 				CB0FC14C2D964041004A8530 /* MatchingGameViewModel.swift */,
 				CB7AEB0F2D98972C00474E80 /* Achievement.swift */,
+				CB2810AF2DF28F4300A9DC05 /* PersonalizedRecommendationsManager.swift */,
 				CB7AEB112D9897BE00474E80 /* AchievementsManager.swift */,
 				CB82DE5D2D89E57300E73551 /* DataManager.swift */,
+				CB2810B12DF28FE400A9DC05 /* AdaptiveLearningEngine.swift */,
 				CB0FC1402D9635BB004A8530 /* StudyTimeTracker.swift */,
 				9D735F862D903E4F00E78630 /* Utilities */,
 				CB00ED062D8F3E29001182C0 /* GeminiService.swift */,
@@ -267,7 +273,7 @@
 				CBECC2542CE4276E001F8ED0 /* GreetingView.swift */,
 				CBECC2562CE4277A001F8ED0 /* LoginView.swift */,
 				CB6602982CE67605004BD579 /* SignupView.swift */,
-				CB7AEB052D98901800474E80 /* RecommendedSetsView.swift */,
+				CB7AEB052D98901800474E80 /* EnhancedRecommendedSetsView.swift */,
 				CB00ECF32D8C58C7001182C0 /* ProfileView.swift */,
 				CB0FC13A2D962C48004A8530 /* PhoneNumberEntryView.swift */,
 				CB66029A2CE6BF65004BD579 /* HomeView.swift */,
@@ -434,6 +440,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB0FC16B2D975704004A8530 /* OnboardingView.swift in Sources */,
+				CB2810B02DF28F4300A9DC05 /* PersonalizedRecommendationsManager.swift in Sources */,
 				CBECC2552CE4276E001F8ED0 /* GreetingView.swift in Sources */,
 				CB82DE5E2D89E57300E73551 /* DataManager.swift in Sources */,
 				CB0FC13B2D962C48004A8530 /* PhoneNumberEntryView.swift in Sources */,
@@ -448,7 +455,7 @@
 				CB7AEB122D9897BE00474E80 /* AchievementsManager.swift in Sources */,
 				CB04898B2CEA68780037BA6F /* NewSetView.swift in Sources */,
 				CB00ED0B2D8F3E65001182C0 /* GenerateSetView.swift in Sources */,
-				CB7AEB062D98901800474E80 /* RecommendedSetsView.swift in Sources */,
+				CB7AEB062D98901800474E80 /* EnhancedRecommendedSetsView.swift in Sources */,
 				CB00ED092D8F3E47001182C0 /* GenerateSetViewModel.swift in Sources */,
 				CB82DE622D89E9FF00E73551 /* SetsListView.swift in Sources */,
 				CB7AEB142D9897D100474E80 /* AchievementsSectionView.swift in Sources */,
@@ -458,6 +465,7 @@
 				CB0FC1572D97314F004A8530 /* OtherUserProfileView.swift in Sources */,
 				CB0FC1392D962BDC004A8530 /* TwoFactorAuthView.swift in Sources */,
 				CB0FC1592D9731CB004A8530 /* SetVisibilityToggle.swift in Sources */,
+				CB2810B22DF28FE400A9DC05 /* AdaptiveLearningEngine.swift in Sources */,
 				CBECC22A2CE42702001F8ED0 /* QuizifyApp.swift in Sources */,
 				CB0FC1432D96375D004A8530 /* StudyAnalyticsView.swift in Sources */,
 				CB0FC1412D9635BB004A8530 /* StudyTimeTracker.swift in Sources */,
