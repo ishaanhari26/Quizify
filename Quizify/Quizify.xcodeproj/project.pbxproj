@@ -55,6 +55,14 @@
 		CB8E36CA2D5E7A0500A96E3A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB8E36C92D5E7A0500A96E3A /* FirebaseAuth */; };
 		CBAE4E9C2D63C37800D348E3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBAE4E9B2D63C37800D348E3 /* GoogleService-Info.plist */; };
 		CBDD1F222D6665C0004EC398 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CBDD1F212D6665C0004EC398 /* FirebaseAuth */; };
+		CBE7737F2E0F1B7900C229D0 /* QuizRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE7737E2E0F1B7900C229D0 /* QuizRoom.swift */; };
+		CBE773812E0F1B9000C229D0 /* QuizRoomManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE773802E0F1B9000C229D0 /* QuizRoomManager.swift */; };
+		CBE773832E0F1BB500C229D0 /* QuizRoomsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE773822E0F1BB500C229D0 /* QuizRoomsMenuView.swift */; };
+		CBE773852E0F1BC600C229D0 /* HostRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE773842E0F1BC600C229D0 /* HostRoomView.swift */; };
+		CBE773872E0F1BD200C229D0 /* JoinRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE773862E0F1BD200C229D0 /* JoinRoomView.swift */; };
+		CBE773892E0F1BDE00C229D0 /* WaitingLobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE773882E0F1BDE00C229D0 /* WaitingLobbyView.swift */; };
+		CBE7738B2E0F1BEB00C229D0 /* ActiveQuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE7738A2E0F1BEB00C229D0 /* ActiveQuizView.swift */; };
+		CBE7738D2E0F1BFC00C229D0 /* GameResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE7738C2E0F1BFC00C229D0 /* GameResultsView.swift */; };
 		CBECC22A2CE42702001F8ED0 /* QuizifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBECC2292CE42702001F8ED0 /* QuizifyApp.swift */; };
 		CBECC22E2CE42706001F8ED0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBECC22D2CE42706001F8ED0 /* Assets.xcassets */; };
 		CBECC2312CE42706001F8ED0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBECC2302CE42706001F8ED0 /* Preview Assets.xcassets */; };
@@ -114,6 +122,14 @@
 		CB82DE612D89E9FF00E73551 /* SetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetsListView.swift; sourceTree = "<group>"; };
 		CB8332822D6913EE00ACDC99 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		CBAE4E9B2D63C37800D348E3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CBE7737E2E0F1B7900C229D0 /* QuizRoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizRoom.swift; sourceTree = "<group>"; };
+		CBE773802E0F1B9000C229D0 /* QuizRoomManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizRoomManager.swift; sourceTree = "<group>"; };
+		CBE773822E0F1BB500C229D0 /* QuizRoomsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizRoomsMenuView.swift; sourceTree = "<group>"; };
+		CBE773842E0F1BC600C229D0 /* HostRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostRoomView.swift; sourceTree = "<group>"; };
+		CBE773862E0F1BD200C229D0 /* JoinRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinRoomView.swift; sourceTree = "<group>"; };
+		CBE773882E0F1BDE00C229D0 /* WaitingLobbyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingLobbyView.swift; sourceTree = "<group>"; };
+		CBE7738A2E0F1BEB00C229D0 /* ActiveQuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveQuizView.swift; sourceTree = "<group>"; };
+		CBE7738C2E0F1BFC00C229D0 /* GameResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameResultsView.swift; sourceTree = "<group>"; };
 		CBECC2262CE42702001F8ED0 /* Quizify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quizify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBECC2292CE42702001F8ED0 /* QuizifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizifyApp.swift; sourceTree = "<group>"; };
 		CBECC22D2CE42706001F8ED0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -226,6 +242,8 @@
 				CB7AEB0F2D98972C00474E80 /* Achievement.swift */,
 				CB7AEB112D9897BE00474E80 /* AchievementsManager.swift */,
 				CB82DE5D2D89E57300E73551 /* DataManager.swift */,
+				CBE7737E2E0F1B7900C229D0 /* QuizRoom.swift */,
+				CBE773802E0F1B9000C229D0 /* QuizRoomManager.swift */,
 				CB0FC1402D9635BB004A8530 /* StudyTimeTracker.swift */,
 				9D735F862D903E4F00E78630 /* Utilities */,
 				CB00ED062D8F3E29001182C0 /* GeminiService.swift */,
@@ -276,8 +294,14 @@
 				CB04898A2CEA68780037BA6F /* NewSetView.swift */,
 				CB00ED0A2D8F3E65001182C0 /* GenerateSetView.swift */,
 				CB0FC1362D962BC1004A8530 /* TwoFactorSettingsView.swift */,
+				CBE773822E0F1BB500C229D0 /* QuizRoomsMenuView.swift */,
+				CBE773842E0F1BC600C229D0 /* HostRoomView.swift */,
 				CB0FC1542D9730A5004A8530 /* UserDiscoveryView.swift */,
+				CBE773862E0F1BD200C229D0 /* JoinRoomView.swift */,
+				CBE773882E0F1BDE00C229D0 /* WaitingLobbyView.swift */,
+				CBE7738A2E0F1BEB00C229D0 /* ActiveQuizView.swift */,
 				CB0FC1562D97314F004A8530 /* OtherUserProfileView.swift */,
+				CBE7738C2E0F1BFC00C229D0 /* GameResultsView.swift */,
 				CB0FC1382D962BDC004A8530 /* TwoFactorAuthView.swift */,
 				CB0FC16A2D975704004A8530 /* OnboardingView.swift */,
 				CB0FC1422D96375D004A8530 /* StudyAnalyticsView.swift */,
@@ -435,6 +459,7 @@
 			files = (
 				CB0FC16B2D975704004A8530 /* OnboardingView.swift in Sources */,
 				CBECC2552CE4276E001F8ED0 /* GreetingView.swift in Sources */,
+				CBE773872E0F1BD200C229D0 /* JoinRoomView.swift in Sources */,
 				CB82DE5E2D89E57300E73551 /* DataManager.swift in Sources */,
 				CB0FC13B2D962C48004A8530 /* PhoneNumberEntryView.swift in Sources */,
 				9D735F882D903E8100E78630 /* Utilities.swift in Sources */,
@@ -450,11 +475,16 @@
 				CB00ED0B2D8F3E65001182C0 /* GenerateSetView.swift in Sources */,
 				CB7AEB062D98901800474E80 /* RecommendedSetsView.swift in Sources */,
 				CB00ED092D8F3E47001182C0 /* GenerateSetViewModel.swift in Sources */,
+				CBE773852E0F1BC600C229D0 /* HostRoomView.swift in Sources */,
 				CB82DE622D89E9FF00E73551 /* SetsListView.swift in Sources */,
+				CBE7737F2E0F1B7900C229D0 /* QuizRoom.swift in Sources */,
+				CBE7738D2E0F1BFC00C229D0 /* GameResultsView.swift in Sources */,
 				CB7AEB142D9897D100474E80 /* AchievementsSectionView.swift in Sources */,
 				CB0FC1372D962BC1004A8530 /* TwoFactorSettingsView.swift in Sources */,
+				CBE773892E0F1BDE00C229D0 /* WaitingLobbyView.swift in Sources */,
 				CB7AEB102D98972C00474E80 /* Achievement.swift in Sources */,
 				CB66029B2CE6BF65004BD579 /* HomeView.swift in Sources */,
+				CBE773832E0F1BB500C229D0 /* QuizRoomsMenuView.swift in Sources */,
 				CB0FC1572D97314F004A8530 /* OtherUserProfileView.swift in Sources */,
 				CB0FC1392D962BDC004A8530 /* TwoFactorAuthView.swift in Sources */,
 				CB0FC1592D9731CB004A8530 /* SetVisibilityToggle.swift in Sources */,
@@ -464,6 +494,8 @@
 				CB0FC15B2D973458004A8530 /* PublicSetsManagerView.swift in Sources */,
 				CB0FC1552D9730A5004A8530 /* UserDiscoveryView.swift in Sources */,
 				CB0FC14B2D964020004A8530 /* MatchingGameView.swift in Sources */,
+				CBE7738B2E0F1BEB00C229D0 /* ActiveQuizView.swift in Sources */,
+				CBE773812E0F1B9000C229D0 /* QuizRoomManager.swift in Sources */,
 				CB00ECF42D8C58C7001182C0 /* ProfileView.swift in Sources */,
 				CB6602992CE67605004BD579 /* SignupView.swift in Sources */,
 			);
