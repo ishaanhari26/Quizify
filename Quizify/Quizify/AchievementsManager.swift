@@ -303,6 +303,42 @@ class AchievementsManager: ObservableObject {
                 isUnlocked: false,
                 unlockedDate: nil,
                 color: "#9460C9"
+            ),
+            Achievement(
+                id: "game_host",
+                title: "Game Master",
+                description: "Host your first QuizRoom",
+                icon: "crown.fill",
+                category: .social,
+                progress: 0,
+                targetValue: 1,
+                isUnlocked: false,
+                unlockedDate: nil,
+                color: "#C97D60"
+            ),
+            Achievement(
+                id: "quiz_champion",
+                title: "Quiz Champion",
+                description: "Win a QuizRoom game",
+                icon: "trophy.fill",
+                category: .mastery,
+                progress: 0,
+                targetValue: 1,
+                isUnlocked: false,
+                unlockedDate: nil,
+                color: "#C9B260"
+            ),
+            Achievement(
+                id: "social_learner",
+                title: "Social Learner",
+                description: "Participate in 5 QuizRooms",
+                icon: "person.2.fill",
+                category: .social,
+                progress: 0,
+                targetValue: 5,
+                isUnlocked: false,
+                unlockedDate: nil,
+                color: "#9460C9"
             )
         ]
     }

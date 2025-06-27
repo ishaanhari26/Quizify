@@ -1072,3 +1072,20 @@ extension DataManager {
         AchievementsManager.shared.checkProfileCompletionAchievement(isComplete: true)
     }
 }
+
+
+extension DataManager{
+    
+    
+    func updateAchievementsForQuizRoom(isWinner: Bool, isHost: Bool) {
+        if isHost {
+            AchievementsManager.shared.incrementAchievement(id: "game_host")
+        }
+        
+        if isWinner {
+            AchievementsManager.shared.incrementAchievement(id: "quiz_champion")
+        }
+        
+        AchievementsManager.shared.incrementAchievement(id: "social_learner")
+    }
+}

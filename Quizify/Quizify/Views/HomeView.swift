@@ -125,6 +125,18 @@ struct HomeView: View {
                             .foregroundColor(.black)
                     }
                 }
+                
+                NavigationLink(destination: QuizRoomsMenuView()) {
+                    HStack(spacing: 15) {
+                        Image(systemName: "gamecontroller.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(hex: "#C97D60"))
+                        Text("QuizRooms")
+                            .font(.custom("Kiwi Maru Light", size: 16))
+                            .foregroundColor(.black)
+                    }
+                }
+                
             }
             .padding(.top, 40)
             .padding(.horizontal)
