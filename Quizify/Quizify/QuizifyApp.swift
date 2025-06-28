@@ -19,7 +19,6 @@ struct QuizifyApp: App {
         // Set up keyboard dismissal
         KeyboardDismisser.shared.setupKeyboardDismissal()
         
-
     }
     
     var body: some Scene {
