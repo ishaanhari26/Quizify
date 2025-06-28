@@ -45,9 +45,12 @@ class QuizRoomManager: ObservableObject {
     }
     
     deinit {
-        Task { @MainActor in
-            cleanup()
-        }
+        // Clean up synchronously - these operations don't need MainActor
+        roomListener?.remove()
+        playersListener?.remove()
+        gameStateListener?.remove()
+        questionTimer?.invalidate()
+        print("QuizRoomManager deallocated") // For debugging
     }
     
     // MARK: - Room Creation (Host)
@@ -104,7 +107,8 @@ class QuizRoomManager: ObservableObject {
                 lastActiveAt: Date()
             )
             
-            let playerRef = roomRef.collection("Players").document(userID)
+            let playerRef = db.collection("QuizRooms").document(room.id)
+                .collection("Players").document(userID)
             try await playerRef.setData(hostPlayer.toDictionary())
             
             // Set current room and start listening
@@ -122,7 +126,7 @@ class QuizRoomManager: ObservableObject {
         }
     }
     
-    // MARK: - Room Joining (Player)
+    // MARK: - Room Joining (Guest)
     func joinRoom(roomCode: String) async throws {
         guard let userID = AuthManager.shared.getUserID() else {
             throw QuizRoomError.notAuthenticated
@@ -133,29 +137,27 @@ class QuizRoomManager: ObservableObject {
         
         do {
             // Find room by code
-            let snapshot = try await db.collection("QuizRooms")
-                .whereField("roomCode", isEqualTo: roomCode)
-                .whereField("status", isEqualTo: QuizRoomStatus.waiting.rawValue)
+            let roomQuery = try await db.collection("QuizRooms")
+                .whereField("roomCode", isEqualTo: roomCode.uppercased())
+                .whereField("status", in: [QuizRoomStatus.waiting.rawValue, QuizRoomStatus.active.rawValue])
                 .getDocuments()
             
-            guard let roomDocument = snapshot.documents.first,
-                  let room = QuizRoom(document: roomDocument) else {
+            guard let roomDoc = roomQuery.documents.first,
+                  let room = QuizRoom(document: roomDoc) else {
                 throw QuizRoomError.roomNotFound
             }
             
             // Check if room is full
-            let playersSnapshot = try await db.collection("QuizRooms").document(room.id)
+            let playersQuery = try await db.collection("QuizRooms").document(room.id)
                 .collection("Players").getDocuments()
             
-            if playersSnapshot.documents.count >= room.maxPlayers {
+            if playersQuery.documents.count >= 5 {
                 throw QuizRoomError.roomFull
             }
             
-            // Check if user is already in the room
-            let existingPlayerDoc = try await db.collection("QuizRooms").document(room.id)
-                .collection("Players").document(userID).getDocument()
-            
-            if existingPlayerDoc.exists {
+            // Check if user is already in room
+            let existingPlayer = playersQuery.documents.first { $0.documentID == userID }
+            if existingPlayer != nil {
                 throw QuizRoomError.alreadyInRoom
             }
             
@@ -240,26 +242,13 @@ class QuizRoomManager: ObservableObject {
             throw QuizRoomError.notHost
         }
         
-        let currentQuestionIndex = room.currentRound - 1
-        guard currentQuestionIndex < room.questions.count else {
-            // Game is complete
-            try await endGame()
-            return
-        }
+        let roomRef = db.collection("QuizRooms").document(room.id)
         
         do {
-            let startTime = Date()
-            let endTime = startTime.addingTimeInterval(15.0) // 15 seconds per question
-            
-            // Update room with question timing
-            let roomRef = db.collection("QuizRooms").document(room.id)
+            // Set question start time
             try await roomRef.updateData([
-                "currentQuestionStartTime": Timestamp(date: startTime)
+                "currentQuestionStartTime": Timestamp(date: Date())
             ])
-            
-            // Start question timer
-            startQuestionTimer(duration: 15)
-            isQuestionActive = true
             
         } catch {
             errorMessage = error.localizedDescription
@@ -274,25 +263,39 @@ class QuizRoomManager: ObservableObject {
             throw QuizRoomError.notHost
         }
         
-        let nextRound = room.currentRound + 1
-        
-        if nextRound > room.maxRounds {
-            // Game complete
-            try await endGame()
-            return
-        }
+        let roomRef = db.collection("QuizRooms").document(room.id)
         
         do {
-            // Update to next round
-            let roomRef = db.collection("QuizRooms").document(room.id)
-            try await roomRef.updateData([
-                "currentRound": nextRound
-            ])
-            
-            // Start next question after a brief delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                Task {
-                    try? await self.startNextQuestion()
+            if room.currentRound < room.maxRounds {
+                // Move to next round
+                let nextRound = room.currentRound + 1
+                try await roomRef.updateData([
+                    "currentRound": nextRound,
+                    "currentQuestionStartTime": FieldValue.delete()
+                ])
+                
+                // Start next question after brief delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+                    Task {
+                        try? await self?.startNextQuestion()
+                    }
+                }
+            } else {
+                // Game is finished
+                try await roomRef.updateData([
+                    "status": QuizRoomStatus.ended.rawValue,
+                    "endedAt": Timestamp(date: Date()),
+                    "currentQuestionStartTime": FieldValue.delete()
+                ])
+                
+                // Calculate final scores and rankings
+                // This could trigger a cloud function or be handled here
+                if room.currentRound >= room.maxRounds {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                        Task {
+                            try? await self?.moveToNextRound()
+                        }
+                    }
                 }
             }
             
@@ -355,50 +358,13 @@ class QuizRoomManager: ObservableObject {
                 "pointsAwarded": response.pointsAwarded
             ])
             
-            // Update player score
+            // Update player's total score
             let playerRef = db.collection("QuizRooms").document(room.id)
                 .collection("Players").document(player.id)
-            
-            try await db.runTransaction { transaction, errorPointer in
-                let playerDoc: DocumentSnapshot
-                do {
-                    playerDoc = try transaction.getDocument(playerRef)
-                } catch {
-                    return nil
-                }
-                
-                guard let playerData = playerDoc.data(),
-                      var currentPlayer = QuizPlayer(document: playerDoc) else {
-                    return nil
-                }
-                
-                currentPlayer.addRoundScore(pointsAwarded)
-                currentPlayer.updateLastActive()
-                
-                transaction.setData(currentPlayer.toDictionary(), forDocument: playerRef)
-                return nil
-            }
-            
-        } catch {
-            errorMessage = error.localizedDescription
-            throw error
-        }
-    }
-    
-    // MARK: - Game End
-    func endGame() async throws {
-        guard let room = currentRoom else { return }
-        
-        do {
-            let roomRef = db.collection("QuizRooms").document(room.id)
-            try await roomRef.updateData([
-                "status": QuizRoomStatus.ended.rawValue,
-                "endedAt": Timestamp(date: Date())
+            try await playerRef.updateData([
+                "score": FieldValue.increment(Int64(pointsAwarded)),
+                "lastActiveAt": Timestamp(date: Date())
             ])
-            
-            // Stop question timer
-            stopQuestionTimer()
-            isQuestionActive = false
             
         } catch {
             errorMessage = error.localizedDescription
@@ -409,7 +375,10 @@ class QuizRoomManager: ObservableObject {
     // MARK: - Leave Room
     func leaveRoom() async {
         guard let room = currentRoom,
-              let player = currentPlayer else { return }
+              let player = currentPlayer else {
+            cleanup()
+            return
+        }
         
         do {
             // Remove player from room
@@ -423,11 +392,16 @@ class QuizRoomManager: ObservableObject {
                 try await roomRef.delete()
             }
             
-            cleanup()
+            // Clean up properly
+            await MainActor.run {
+                cleanup()
+            }
             
         } catch {
             print("Error leaving room: \(error.localizedDescription)")
-            cleanup()
+            await MainActor.run {
+                cleanup()
+            }
         }
     }
     
@@ -438,23 +412,25 @@ class QuizRoomManager: ObservableObject {
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
                 
-                if let error = error {
-                    self.errorMessage = error.localizedDescription
-                    return
-                }
-                
-                guard let snapshot = snapshot,
-                      let room = QuizRoom(document: snapshot) else {
-                    self.errorMessage = "Room no longer exists"
-                    self.cleanup()
-                    return
-                }
-                
-                self.currentRoom = room
-                
-                // Handle question timing
-                if room.status == .active {
-                    self.handleQuestionTiming(room: room)
+                Task { @MainActor in
+                    if let error = error {
+                        self.errorMessage = error.localizedDescription
+                        return
+                    }
+                    
+                    guard let snapshot = snapshot,
+                          let room = QuizRoom(document: snapshot) else {
+                        self.errorMessage = "Room no longer exists"
+                        self.cleanup()
+                        return
+                    }
+                    
+                    self.currentRoom = room
+                    
+                    // Handle question timing
+                    if room.status == .active {
+                        self.handleQuestionTiming(room: room)
+                    }
                 }
             }
         
@@ -464,20 +440,22 @@ class QuizRoomManager: ObservableObject {
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
                 
-                if let error = error {
-                    self.errorMessage = error.localizedDescription
-                    return
-                }
-                
-                guard let snapshot = snapshot else { return }
-                
-                self.players = snapshot.documents.compactMap { QuizPlayer(document: $0) }
-                    .sorted { $0.score > $1.score }
-                
-                // Update current player if score changed
-                if let currentPlayerID = self.currentPlayer?.id,
-                   let updatedPlayer = self.players.first(where: { $0.id == currentPlayerID }) {
-                    self.currentPlayer = updatedPlayer
+                Task { @MainActor in
+                    if let error = error {
+                        self.errorMessage = error.localizedDescription
+                        return
+                    }
+                    
+                    guard let snapshot = snapshot else { return }
+                    
+                    self.players = snapshot.documents.compactMap { QuizPlayer(document: $0) }
+                        .sorted { $0.score > $1.score }
+                    
+                    // Update current player if score changed
+                    if let currentPlayerID = self.currentPlayer?.id,
+                       let updatedPlayer = self.players.first(where: { $0.id == currentPlayerID }) {
+                        self.currentPlayer = updatedPlayer
+                    }
                 }
             }
         
@@ -509,22 +487,28 @@ class QuizRoomManager: ObservableObject {
         stopQuestionTimer()
         timeRemaining = Int(duration)
         
-        questionTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
+        // Use weak self to prevent retain cycles
+        questionTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
             
-            if self.timeRemaining > 0 {
-                self.timeRemaining -= 1
-            } else {
-                self.stopQuestionTimer()
-                self.isQuestionActive = false
-                
-                // If host, move to next round after brief delay
-                if let room = self.currentRoom,
-                   let userID = AuthManager.shared.getUserID(),
-                   room.hostID == userID {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        Task {
-                            try? await self.moveToNextRound()
+            Task { @MainActor in
+                if self.timeRemaining > 0 {
+                    self.timeRemaining -= 1
+                } else {
+                    self.stopQuestionTimer()
+                    self.isQuestionActive = false
+                    
+                    // If host, move to next round after brief delay
+                    if let room = self.currentRoom,
+                       let userID = AuthManager.shared.getUserID(),
+                       room.hostID == userID {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            Task {
+                                try? await self.moveToNextRound()
+                            }
                         }
                     }
                 }
@@ -570,11 +554,18 @@ class QuizRoomManager: ObservableObject {
         connectionStatus = .connected
     }
     
+    // MARK: - Cleanup Methods
     private func cleanup() {
+        // This method can remain @MainActor for UI updates
         roomListener?.remove()
         playersListener?.remove()
         gameStateListener?.remove()
         stopQuestionTimer()
+        
+        // Clear references
+        roomListener = nil
+        playersListener = nil
+        gameStateListener = nil
         
         currentRoom = nil
         currentPlayer = nil
@@ -583,6 +574,9 @@ class QuizRoomManager: ObservableObject {
         isQuestionActive = false
         connectionStatus = .disconnected
     }
+    
+    // Remove the nonisolated cleanup method that causes MainActor errors
+    // The deinit and regular cleanup() method are sufficient
     
     // MARK: - Public Helper Methods
     func isHost() -> Bool {
