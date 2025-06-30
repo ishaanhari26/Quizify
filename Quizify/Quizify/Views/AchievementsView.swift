@@ -109,30 +109,6 @@ struct AchievementsView: View {
                         .padding(.bottom, 30)
                     }
                 }
-                
-                // Achievement unlock animation
-                if achievementsManager.showUnlockAnimation,
-                    let achievement = achievementsManager.currentUnlockedAchievement {
-                    Color.black.opacity(0.7)
-                        .ignoresSafeArea()
-                        .overlay(
-                            AchievementUnlockView(achievement: achievement)
-                        )
-                        .transition(.opacity)
-                        .onAppear {
-                            // Automatically dismiss after a few seconds
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                withAnimation {
-                                    achievementsManager.showUnlockAnimation = false
-                                }
-                            }
-                        }
-                        .onTapGesture {
-                            withAnimation {
-                                achievementsManager.showUnlockAnimation = false
-                            }
-                        }
-                }
             }
         }
         .onAppear {
@@ -317,77 +293,77 @@ struct AchievementDetailCard: View {
     }
 }
 
-struct AchievementUnlockView: View {
-    let achievement: Achievement
-    @State private var animationComplete = false
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "trophy.fill")
-                .font(.system(size: 60))
-                .foregroundColor(Color.yellow)
-                .padding()
-                .scaleEffect(animationComplete ? 1.0 : 0.5)
-                .opacity(animationComplete ? 1.0 : 0.0)
-                .animation(.spring(response: 0.5, dampingFraction: 0.6), value: animationComplete)
-            
-            Text("Achievement Unlocked!")
-                .font(.custom("Kiwi Maru Bold", size: 24))
-                .foregroundColor(.white)
-                .opacity(animationComplete ? 1.0 : 0.0)
-                .animation(.easeIn(duration: 0.3).delay(0.3), value: animationComplete)
-            
-            ZStack {
-                Circle()
-                    .fill(Color(hex: achievement.color).opacity(0.3))
-                    .frame(width: 80, height: 80)
-                
-                Image(systemName: achievement.icon)
-                    .font(.system(size: 36))
-                    .foregroundColor(Color(hex: achievement.color))
-            }
-            .scaleEffect(animationComplete ? 1.0 : 0.5)
-            .opacity(animationComplete ? 1.0 : 0.0)
-            .animation(.easeIn(duration: 0.3).delay(0.5), value: animationComplete)
-            
-            Text(achievement.title)
-                .font(.custom("Kiwi Maru Medium", size: 20))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 30)
-                .opacity(animationComplete ? 1.0 : 0.0)
-                .animation(.easeIn(duration: 0.3).delay(0.7), value: animationComplete)
-            
-            Text(achievement.description)
-                .font(.custom("Kiwi Maru Light", size: 16))
-                .foregroundColor(.white.opacity(0.9))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 30)
-                .opacity(animationComplete ? 1.0 : 0.0)
-                .animation(.easeIn(duration: 0.3).delay(0.9), value: animationComplete)
-            
-            Text("Tap anywhere to continue")
-                .font(.custom("Kiwi Maru Light", size: 14))
-                .foregroundColor(.white.opacity(0.7))
-                .padding(.top, 30)
-                .opacity(animationComplete ? 1.0 : 0.0)
-                .animation(.easeIn(duration: 0.3).delay(1.1), value: animationComplete)
-        }
-        .padding(30)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black.opacity(0.8))
-        )
-        .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
-        .padding(40)
-        .onAppear {
-            // Start animations
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                animationComplete = true
-            }
-        }
-    }
-}
+//struct AchievementUnlockView: View {
+//    let achievement: Achievement
+//    @State private var animationComplete = false
+//    
+//    var body: some View {
+//        VStack(spacing: 20) {
+//            Image(systemName: "trophy.fill")
+//                .font(.system(size: 60))
+//                .foregroundColor(Color.yellow)
+//                .padding()
+//                .scaleEffect(animationComplete ? 1.0 : 0.5)
+//                .opacity(animationComplete ? 1.0 : 0.0)
+//                .animation(.spring(response: 0.5, dampingFraction: 0.6), value: animationComplete)
+//            
+//            Text("Achievement Unlocked!")
+//                .font(.custom("Kiwi Maru Bold", size: 24))
+//                .foregroundColor(.white)
+//                .opacity(animationComplete ? 1.0 : 0.0)
+//                .animation(.easeIn(duration: 0.3).delay(0.3), value: animationComplete)
+//            
+//            ZStack {
+//                Circle()
+//                    .fill(Color(hex: achievement.color).opacity(0.3))
+//                    .frame(width: 80, height: 80)
+//                
+//                Image(systemName: achievement.icon)
+//                    .font(.system(size: 36))
+//                    .foregroundColor(Color(hex: achievement.color))
+//            }
+//            .scaleEffect(animationComplete ? 1.0 : 0.5)
+//            .opacity(animationComplete ? 1.0 : 0.0)
+//            .animation(.easeIn(duration: 0.3).delay(0.5), value: animationComplete)
+//            
+//            Text(achievement.title)
+//                .font(.custom("Kiwi Maru Medium", size: 20))
+//                .foregroundColor(.white)
+//                .multilineTextAlignment(.center)
+//                .padding(.horizontal, 30)
+//                .opacity(animationComplete ? 1.0 : 0.0)
+//                .animation(.easeIn(duration: 0.3).delay(0.7), value: animationComplete)
+//            
+//            Text(achievement.description)
+//                .font(.custom("Kiwi Maru Light", size: 16))
+//                .foregroundColor(.white.opacity(0.9))
+//                .multilineTextAlignment(.center)
+//                .padding(.horizontal, 30)
+//                .opacity(animationComplete ? 1.0 : 0.0)
+//                .animation(.easeIn(duration: 0.3).delay(0.9), value: animationComplete)
+//            
+//            Text("Tap anywhere to continue")
+//                .font(.custom("Kiwi Maru Light", size: 14))
+//                .foregroundColor(.white.opacity(0.7))
+//                .padding(.top, 30)
+//                .opacity(animationComplete ? 1.0 : 0.0)
+//                .animation(.easeIn(duration: 0.3).delay(1.1), value: animationComplete)
+//        }
+//        .padding(30)
+//        .background(
+//            RoundedRectangle(cornerRadius: 20)
+//                .fill(Color.black.opacity(0.8))
+//        )
+//        .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+//        .padding(40)
+//        .onAppear {
+//            // Start animations
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                animationComplete = true
+//            }
+//        }
+//    }
+//}
 
 struct AchievementsView_Previews: PreviewProvider {
     static var previews: some View {
