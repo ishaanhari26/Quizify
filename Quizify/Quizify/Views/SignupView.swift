@@ -165,11 +165,9 @@ struct SignupView: View {
                 Button {
                     Task {
                         viewModel.signIn()
-                        // Wait a bit for the sign-in process to complete
                         try? await Task.sleep(nanoseconds: 1_000_000_000)
                         if viewModel.isAuthenticated {
-                            // Don't go to home yet, proceed to onboarding after 2FA
-                            viewModel.shouldShowOnboarding = true
+                            showTwoFactorSetup = true
                         }
                     }
                 } label: {
@@ -183,7 +181,6 @@ struct SignupView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 25)
                 
-                // Add this after your signup button and before any existing Spacer()
                 Spacer().frame(height: 25)
 
                 HStack{
@@ -204,9 +201,7 @@ struct SignupView: View {
                         try await viewModel.googleAuth()
                         
                         if viewModel.isAuthenticated {
-                            if viewModel.shouldShowOnboarding {
-                                showOnboarding = true
-                            } else if viewModel.shouldShowTwoFactor {
+                            if viewModel.shouldShowTwoFactor {
                                 showTwoFactorSetup = true
                             } else if viewModel.isTwoFactorEnabled {
                                 goToHome = true
@@ -241,91 +236,11 @@ struct SignupView: View {
         }
         .ignoresSafeArea(.keyboard)
         .frame(maxHeight: 650)
-        .sheet(isPresented: $viewModel.shouldShowTwoFactor) {
-            PhoneNumberEntryView(goToHome: .constant(false), showOnboarding: $showOnboarding)
-                .onDisappear {
-                    if showOnboarding {
-                        // Check if user profile exists before showing onboarding
-                        Task {
-                            if let userID = AuthManager.shared.getUserID() {
-                                let db = Firestore.firestore()
-                                do {
-                                    let document = try await db.collection("Users").document(userID).getDocument()
-                                    if let data = document.data(),
-                                       let username = data["username"] as? String,
-                                       !username.isEmpty,
-                                       let displayName = data["displayName"] as? String,
-                                       !displayName.isEmpty {
-                                        
-                                        // User has profile, skip onboarding
-                                        viewModel.shouldShowOnboarding = false
-                                        goToHome = true
-                                    } else {
-                                        // User needs onboarding
-                                        viewModel.shouldShowOnboarding = true
-                                    }
-                                } catch {
-                                    // On error, show onboarding
-                                    viewModel.shouldShowOnboarding = true
-                                }
-                            } else {
-                                viewModel.shouldShowOnboarding = true
-                            }
-                        }
-                    }
-                }
-        }
-        .sheet(isPresented: $viewModel.shouldShowTwoFactor) {
-            PhoneNumberEntryView(goToHome: .constant(false), showOnboarding: $showOnboarding)
-                .onDisappear {
-                    // Check if we need to dismiss this view (i.e., if goToHome is true)
-                    if goToHome {
-                        dismiss()
-                    }
-                    
-                    if showOnboarding {
-                        // Check if user profile exists before showing onboarding
-                        Task {
-                            if let userID = AuthManager.shared.getUserID() {
-                                let db = Firestore.firestore()
-                                do {
-                                    let document = try await db.collection("Users").document(userID).getDocument()
-                                    if let data = document.data(),
-                                       let username = data["username"] as? String,
-                                       !username.isEmpty,
-                                       let displayName = data["displayName"] as? String,
-                                       !displayName.isEmpty {
-                                        
-                                        // User has profile, skip onboarding
-                                        viewModel.shouldShowOnboarding = false
-                                        goToHome = true
-                                        // Dismiss this view also
-                                        dismiss()
-                                    } else {
-                                        // User needs onboarding
-                                        viewModel.shouldShowOnboarding = true
-                                    }
-                                } catch {
-                                    // On error, show onboarding
-                                    viewModel.shouldShowOnboarding = true
-                                }
-                            } else {
-                                viewModel.shouldShowOnboarding = true
-                            }
-                        }
-                    }
-                }
-        }
-        
-        // And add this to watch for changes to shouldDismissView:
-        .onChange(of: shouldDismissView) { newValue in
+        .onChange(of: shouldDismissView) { _, newValue in
             if newValue {
-                // Dismiss this view
                 dismiss()
             }
-        }// Add these @State variables to your SignupView
-
-        // Add these fullScreenCover modifiers at the end of your SignupView body
+        }
         .fullScreenCover(isPresented: $showTwoFactorSetup) {
             PhoneNumberEntryView(goToHome: $goToHome, showOnboarding: $showOnboarding)
                 .onDisappear {
