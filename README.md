@@ -1,5 +1,7 @@
 # Quizify - AI-Powered Study Application
 
+*This is a fork of the main repo: [Rishi-S20/Quizify-App](https://github.com/Rishi-S20/Quizify-App)*
+
 ## Description
 Quizify transforms traditional studying through AI-generated flashcard sets, 
 interactive games, progress tracking, and social features.
